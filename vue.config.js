@@ -5,7 +5,9 @@ module.exports = {
       alias: {
         '@@': path.join(__dirname, '/src/components'),
         common: path.join(__dirname, '/src/common'),
-        styl: path.join(__dirname, '/src/common/stylus')
+        styl: path.join(__dirname, '/src/common/stylus'),
+        api: path.join(__dirname, '/src/api'),
+        base: path.join(__dirname, '/src/base')
       }
     }
   },
