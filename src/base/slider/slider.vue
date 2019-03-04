@@ -1,13 +1,17 @@
 <template>
+  <!-- limitHeight限制初始化前slider的高度，避免因为高度过高出现的滚动条导致宽度计算错误 -->
   <div class="slider"
-       ref="slider">
-    <div class="slider-group clearfix"
+       ref="slider" :class="{limitHeight:!slider}">
+    <div class="slider-group"
          ref="sliderGroup">
       <slot>
       </slot>
     </div>
     <div class="dots">
-      <span class="dot" v-for="(item,index) in dots" :key="index" :class="{active:currentIndex === index}"></span>
+      <span class="dot"
+            v-for="(item,index) in dots"
+            :key="index"
+            :class="{active:currentIndex === index}"></span>
     </div>
   </div>
 </template>
@@ -40,28 +44,38 @@ export default {
   },
   data () {
     return {
-      slider: {},
+      slider: null,
       dots: [],
-      currentIndex: 0
+      currentIndex: 0,
+      timer: null
     }
   },
   mounted () {
     setTimeout(() => {
       this._setSliderWidth()
-      this._initDots()
-      this._initSlider()
-      this._play()
+      this.$nextTick(() => {
+        this._initDots()
+        this._initSlider()
+        this._play()
+      })
     }, 20) // 浏览器一般是间隔17ms刷新
+    window.addEventListener('resize', () => {
+      if (!this.slider) {
+        return
+      }
+      this._setSliderWidth(true)
+      this.slider.refresh()
+    })
   },
   methods: {
-    _setSliderWidth () {
+    _setSliderWidth (refreshing) {
       let baseWidth = this.$refs.slider.clientWidth
       let sliderGroup = this.$refs.sliderGroup
       let sliderItems = sliderGroup.children
       let sliderGroupWidth = baseWidth * sliderItems.length
 
       // 循环时左右会各自复制一个dom
-      if (this.loop) {
+      if (this.loop && !refreshing) {
         sliderGroupWidth += baseWidth * 2
       }
       for (let i = 0; i < sliderItems.length; i++) {
@@ -88,10 +102,20 @@ export default {
         bounce: false,
         stopPropagation: true
       })
+      this.slider.on('beforeScrollStart', () => {
+        if (this.timer) {
+          clearTimeout(this.timer)
+        }
+      })
       this.slider.on('scrollEnd', () => {
         this.currentIndex = this.slider.getCurrentPage().pageX
-        clearTimeout(this.timer)
-        this._play()
+        if (this.autoPlay) {
+          // 循环滚动时，在倒数第二张转到第一张图片时会触发两次滚动事件（倒数第二张图片到最后一张图片再到第二张图片，因此要注意使用定时器先清定时器，否则会连续触发两次定时器
+          if (this.timer) {
+            clearTimeout(this.timer)
+          }
+          this._play()
+        }
       })
     },
     _play () {
@@ -99,8 +123,9 @@ export default {
         return
       }
       this.timer = setTimeout(() => {
-        this.currentIndex++
-        this.slider.goToPage(this.currentIndex, 0, this.speed)
+        this.slider.next()
+        setTimeout(() => {
+        }, 500)
       }, this.interval)
     }
   }
@@ -113,6 +138,8 @@ export default {
   position: relative
   width: 100%
   overflow: hidden
+  &.limitHeight
+    max-height 1px
   .slider-group
     position: relative
     .slider-item
