@@ -2,7 +2,7 @@
   <!-- limitHeight限制初始化前slider的高度，避免因为高度过高出现的滚动条导致宽度计算错误 -->
   <div class="slider"
        ref="slider"
-       :class="{limitHeight:!slider}">
+       :class="{limitHeight:limitHeightFlag}">
     <div class="slider-group"
          ref="sliderGroup">
       <slot>
@@ -48,7 +48,8 @@ export default {
       slider: null,
       dots: [],
       currentIndex: 0,
-      timer: null
+      timer: null,
+      limitHeightFlag: true
     }
   },
   mounted () {
@@ -64,8 +65,12 @@ export default {
       if (!this.slider) {
         return
       }
-      this._setSliderWidth(true)
-      this.slider.refresh()
+      // 更新宽度时要限制div的高度，防止超出屏幕，出现滚动条。滚动条的宽度会影响sliderWidth的计算
+      this.limitHeightFlag = true
+      this.$nextTick(() => {
+        this._setSliderWidth(true)
+        this.slider.refresh()
+      })
     })
   },
   distroyed () {
@@ -79,7 +84,6 @@ export default {
       let sliderGroup = this.$refs.sliderGroup
       let sliderItems = sliderGroup.children
       let sliderGroupWidth = baseWidth * sliderItems.length
-
       // 循环时左右会各自复制一个dom
       if (this.loop && !refreshing) {
         sliderGroupWidth += baseWidth * 2
@@ -90,6 +94,7 @@ export default {
         item.style = 'width:' + baseWidth + 'px;'
       }
       sliderGroup.style = 'width:' + sliderGroupWidth + 'px;'
+      this.limitHeightFlag = false
     },
     _initDots () {
       this.dots = new Array(this.$refs.sliderGroup.children.length)

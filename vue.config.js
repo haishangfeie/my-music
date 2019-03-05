@@ -4,7 +4,7 @@ module.exports = {
   devServer: {
     before: function (app) {
       app.get('/api/getDiscList', function (req, res) {
-        var url = 'https://c.y.qq.com/soso/fcgi-bin/search_for_qq_cp'
+        var url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
         axios
           .get(url, {
             headers: {
