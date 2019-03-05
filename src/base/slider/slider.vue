@@ -1,7 +1,8 @@
 <template>
   <!-- limitHeight限制初始化前slider的高度，避免因为高度过高出现的滚动条导致宽度计算错误 -->
   <div class="slider"
-       ref="slider" :class="{limitHeight:!slider}">
+       ref="slider"
+       :class="{limitHeight:!slider}">
     <div class="slider-group"
          ref="sliderGroup">
       <slot>
@@ -66,6 +67,11 @@ export default {
       this._setSliderWidth(true)
       this.slider.refresh()
     })
+  },
+  distroyed () {
+    if (this.timer) {
+      clearTimeout(this.timer)
+    }
   },
   methods: {
     _setSliderWidth (refreshing) {
@@ -139,7 +145,7 @@ export default {
   width: 100%
   overflow: hidden
   &.limitHeight
-    max-height 1px
+    max-height: 1px
   .slider-group
     position: relative
     .slider-item
