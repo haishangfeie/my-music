@@ -1,8 +1,6 @@
 <template>
-  <!-- limitHeight限制初始化前slider的高度，避免因为高度过高出现的滚动条导致宽度计算错误 -->
   <div class="slider"
-       ref="slider"
-       :class="{limitHeight:limitHeightFlag}">
+       ref="slider">
     <div class="slider-group"
          ref="sliderGroup">
       <slot>
@@ -48,8 +46,7 @@ export default {
       slider: null,
       dots: [],
       currentIndex: 0,
-      timer: null,
-      limitHeightFlag: true
+      timer: null
     }
   },
   mounted () {
@@ -65,8 +62,6 @@ export default {
       if (!this.slider) {
         return
       }
-      // 更新宽度时要限制div的高度，防止超出屏幕，出现滚动条。滚动条的宽度会影响sliderWidth的计算
-      this.limitHeightFlag = true
       this.$nextTick(() => {
         this._setSliderWidth(true)
         this.slider.refresh()
@@ -94,7 +89,6 @@ export default {
         item.style = 'width:' + baseWidth + 'px;'
       }
       sliderGroup.style = 'width:' + sliderGroupWidth + 'px;'
-      this.limitHeightFlag = false
     },
     _initDots () {
       this.dots = new Array(this.$refs.sliderGroup.children.length)
@@ -111,7 +105,7 @@ export default {
           speed: this.speed
         },
         bounce: false,
-        stopPropagation: true
+        stopPropagation: false
       })
       this.slider.on('beforeScrollStart', () => {
         if (this.timer) {
