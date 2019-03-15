@@ -1,10 +1,11 @@
 <template>
-  <div>
-    歌手页面
+  <div class="container">
+    <list-view :data="singerList"></list-view>
   </div>
 </template>
 
 <script>
+import listView from 'base/list-view/list-view'
 import { getSingerList } from 'api/singer'
 import Singer from 'common/js/singer'
 const ERR_OK = 0
@@ -16,6 +17,9 @@ export default {
     return {
       singerList: []
     }
+  },
+  components: {
+    listView
   },
   created () {
     this._getSingerList()
@@ -69,5 +73,11 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="stylus">
+.container
+  position: fixed
+  width: 100%
+  top: 88px
+  bottom: 0
+  overflow: hidden
 </style>

@@ -29,6 +29,10 @@ export default {
     probeType: {
       type: Number,
       default: 0
+    },
+    listenScroll: {
+      type: Boolean,
+      default: false
     }
 
   },
@@ -56,6 +60,11 @@ export default {
         bounce: this.bounce,
         probeType: this.probeType
       })
+      this.scroll.on('scroll', (pos) => {
+        if (this.listenScroll) {
+          this.$emit('scroll', pos)
+        }
+      })
     },
     refresh () {
       if (!this.scroll) {
@@ -68,6 +77,12 @@ export default {
     },
     disable () {
       this.scroll && this.scroll.disable()
+    },
+    scrollTo () {
+      this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments)
+    },
+    scrollToElement () {
+      this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments)
     }
 
   }

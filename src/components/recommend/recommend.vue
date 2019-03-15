@@ -5,15 +5,17 @@
     <div>
       <div v-if="recommends.length"
            class="slider-wrap">
-        <slider>
-          <div v-for="(item,index) in recommends"
-               :key="index">
-            <a :href="item.linkUrl">
-              <img @load="imgLoad"
-                   :src="item.picUrl">
-            </a>
-          </div>
-        </slider>
+        <div class="slider-container">
+          <slider>
+            <div v-for="(item,index) in recommends"
+                 :key="index">
+              <a :href="item.linkUrl">
+                <img @load="imgLoad"
+                     :src="item.picUrl">
+              </a>
+            </div>
+          </slider>
+        </div>
       </div>
       <div class="block">
         <h1 class="title">热门歌单推荐</h1>
@@ -95,6 +97,18 @@ export default {
   top: 88px
   bottom: 0
   overflow: hidden
+  .slider-wrap
+    position: relative
+    width: 100%
+    height: 0
+    padding-top: 40%
+    overflow hidden
+    .slider-container
+      position absolute
+      top 0
+      left 0
+      width 100%
+      height 100%
   .block
     .title
       height: 65px

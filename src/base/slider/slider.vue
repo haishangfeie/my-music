@@ -143,8 +143,6 @@ export default {
   position: relative
   width: 100%
   overflow: hidden
-  &.limitHeight
-    max-height: 1px
   .slider-group
     position: relative
     .slider-item
