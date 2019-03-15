@@ -24,7 +24,8 @@
       </li>
     </ul>
     <!-- fixed-title -->
-    <h2 v-show="fixed" class="fixed-title">{{fixedTitleText}}</h2>
+    <h2 v-show="fixed"
+        class="fixed-title" ref="fixedTitle">{{fixedTitleText}}</h2>
     <ul class="shortcut-list-wrap"
         @touchstart.stop.prevent="onShortcutTouchstart"
         @touchmove.stop.prevent="onShortcutTouchmove">
@@ -43,6 +44,9 @@ import { getData } from 'common/js/dom'
 
 // 右侧快速入口每个入口的高度都是18px
 const SHORTCUT_ITEM_HEIGHT = 18
+
+// 每个group的title的高度
+const GROUP_TITLE_HEIGHT = 30
 
 export default {
   components: {
@@ -87,6 +91,7 @@ export default {
     this.touch = {}
     this.touchStartIndex = -1
     this.groupsHeight = []
+    this.diff = 0
   },
   methods: {
     onShortcutTouchstart (e) {
@@ -134,6 +139,27 @@ export default {
     },
     onScroll (pos) {
       let currentScroll = -pos.y
+      this.updateCurrentIndexWhenScroll(currentScroll)
+      this.updateFixedTitlePos(currentScroll)
+    },
+    updateFixedTitlePos (currentScroll) {
+      let groupsHeight = this.groupsHeight
+      for (let i = 0; i < groupsHeight.length; i++) {
+        let item = groupsHeight[i]
+        if (currentScroll > item - GROUP_TITLE_HEIGHT && currentScroll < item) {
+          let diff = currentScroll - (item - GROUP_TITLE_HEIGHT)
+          if (this.diff === diff) {
+            return
+          }
+          this.diff = diff
+          this.$refs.fixedTitle.style.transform = `translate3d(0,-${diff}px,0)`
+          return
+        }
+      }
+      this.diff = 0
+      this.$refs.fixedTitle.style.transform = `translate3d(0,0,0)`
+    },
+    updateCurrentIndexWhenScroll (currentScroll) {
       if (currentScroll < 0) {
         this.currentIndex = 0
         this.fixed = false
@@ -143,6 +169,7 @@ export default {
       for (let i = 0; i < this.groupsHeight.length - 1; i++) {
         let itemHeight = this.groupsHeight[i]
         let nextItemHeight = this.groupsHeight[i + 1]
+
         if (currentScroll >= itemHeight && currentScroll < nextItemHeight) {
           this.currentIndex = i
           return
@@ -189,10 +216,10 @@ export default {
           color: $color-text-l
           font-size: $font-size-medium
   .fixed-title
-    position absolute
-    top 0
-    left 0
-    right 0
+    position: absolute
+    top: 0
+    left: 0
+    right: 0
     height: 30px
     line-height: 30px
     padding-left: 20px
