@@ -1,6 +1,7 @@
 <template>
   <div class="container">
-    <list-view :data="singerList"></list-view>
+    <list-view :data="singerList" @select="toDetail"></list-view>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -25,12 +26,9 @@ export default {
     this._getSingerList()
   },
   methods: {
-    _getSingerList () {
-      getSingerList().then(res => {
-        if (res.code === ERR_OK) {
-          this.singerList = this.mapSingerList(res.data.list)
-        }
-      })
+    toDetail (singer) {
+      console.log(singer)
+      this.$router.push({ path: `/singer/${singer.id}` })
     },
     mapSingerList (list) {
       let map = {
@@ -68,6 +66,13 @@ export default {
         return a.title.charCodeAt(0) - b.title.charCodeAt(0)
       })
       return hot.concat(ret)
+    },
+    _getSingerList () {
+      getSingerList().then(res => {
+        if (res.code === ERR_OK) {
+          this.singerList = this.mapSingerList(res.data.list)
+        }
+      })
     }
   }
 }

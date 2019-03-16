@@ -1,19 +1,16 @@
 @import './variable.styl'
-
-body,html
-  line-height 1
-  font-family:'PingFang SC','STHeitiSC-Light','Helvetical-Light',arial,sans-serif,'Droid Sans Fallback'
-  user-select:none
-  -webkit-tap-highlight-color:transparent
-  background:$color-background
-  color:$color-text
-
+body, html
+  line-height: 1
+  font-family: 'PingFang SC', 'STHeitiSC-Light', 'Helvetical-Light', arial, sans-serif, 'Droid Sans Fallback'
+  user-select: none
+  -webkit-tap-highlight-color: transparent
+  background: $color-background
+  color: $color-text
+  touch-action: none
 // 清除浮动
 .clearfix
-  &:before, 
-  &:after
+  &:before, &:after
     content: ''
     display: table
   &:after
     clear: both
-

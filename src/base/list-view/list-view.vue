@@ -14,7 +14,7 @@
         <ul>
           <li class="item"
               v-for="(item,index) in group.list"
-              :key="index">
+              :key="index" @click="select(item)">
             <img class="avatar"
                  v-lazy="item.picUrl"
                  alt="">
@@ -25,7 +25,8 @@
     </ul>
     <!-- fixed-title -->
     <h2 v-show="fixed"
-        class="fixed-title" ref="fixedTitle">{{fixedTitleText}}</h2>
+        class="fixed-title"
+        ref="fixedTitle">{{fixedTitleText}}</h2>
     <ul class="shortcut-list-wrap"
         @touchstart.stop.prevent="onShortcutTouchstart"
         @touchmove.stop.prevent="onShortcutTouchmove">
@@ -35,11 +36,16 @@
           :class="{current:currentIndex === index}"
           :data-index="index">{{item}}</li>
     </ul>
+    <div class="loading-container"
+         v-if="!data.length">
+      <loading></loading>
+    </div>
   </scroll>
 </template>
 
 <script>
-import scroll from 'base/scroll/scroll'
+import Scroll from 'base/scroll/scroll'
+import Loading from 'base/loading/loading'
 import { getData } from 'common/js/dom'
 
 // 右侧快速入口每个入口的高度都是18px
@@ -50,7 +56,8 @@ const GROUP_TITLE_HEIGHT = 30
 
 export default {
   components: {
-    scroll
+    Scroll,
+    Loading
   },
   props: {
     data: {
@@ -177,6 +184,9 @@ export default {
       }
       this.currentIndex = this.groupsHeight.length - 2
     },
+    select (item) {
+      this.$emit('select', item)
+    },
     _scrollTo () {
       let index = this.currentIndex
       let scroll = this.$refs.scroll
@@ -245,4 +255,10 @@ export default {
       font-size: $font-size-small
       &.current
         color: #ffcd32
+  .loading-container
+    position: absolute
+    top: 50%
+    left 0
+    width 100%
+    transform: translateY(-50%)
 </style>
