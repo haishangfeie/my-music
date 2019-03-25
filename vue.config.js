@@ -1,5 +1,6 @@
 var path = require('path')
 var axios = require('axios')
+var bodyParser = require('body-parser')
 module.exports = {
   devServer: {
     before: function (app) {
@@ -18,6 +19,23 @@ module.exports = {
           })
           .catch(e => {
             console.log(e)
+          })
+      })
+      app.post('/api/getPurlUrl', bodyParser.json(), function (req, res) {
+        const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
+        axios
+          .post(url, req.body, {
+            headers: {
+              referer: 'https://y.qq.com/',
+              origin: 'https://y.qq.com/',
+              'Content-type': 'application/x-www-form-urlencoded'
+            }
+          })
+          .then(response => {
+            res.json(response.data)
+          })
+          .catch(err => {
+            console.log(err)
           })
       })
     }
