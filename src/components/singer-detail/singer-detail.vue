@@ -1,8 +1,6 @@
 <template>
   <transition name="slide">
-    <div class="singer-detail">
-      singer-detail
-    </div>
+    <music-list :songs="songs" :title="singer.name" :bgUrl="singer.picUrl"></music-list>
   </transition>
 </template>
 
@@ -11,8 +9,12 @@ import { mapGetters } from 'vuex'
 import { getSingerDetail } from 'api/singer'
 import { ERR_OK } from 'api/configs'
 import { createSong, isValiMusic, processSongsUrl } from 'common/js/song'
+import musicList from '@@/music-list/music-list'
 
 export default {
+  components: {
+    musicList
+  },
   data () {
     return {
       songs: []
@@ -59,15 +61,7 @@ export default {
 </script>
 
 <style scoped lang="stylus">
-@import '~styl/variable.styl'
-.singer-detail
-  position: fixed
-  top: 0
-  left: 0
-  right: 0
-  bottom: 0
-  z-index: 100
-  background: $color-background
+
 .slide-enter, .slide-leave-to
   transform: translate3d(100%, 0, 0)
 .slide-enter-active, .slide-leave-active
