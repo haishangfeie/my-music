@@ -9,9 +9,12 @@
          ref="header">
       <div class="filter"></div>
     </div>
-    <div class="bg-songs" ref="bgSongs"></div>
+    <div class="bg-songs"
+         ref="bgSongs"></div>
     <scroll class="scroll"
-            :data="songs" :probeType="probeType" :listenScroll="true"
+            :data="songs"
+            :probeType="probeType"
+            :listenScroll="true"
             @scroll="onScroll"
             ref="scroll">
       <song-list :songs="songs"></song-list>
@@ -22,8 +25,12 @@
 <script>
 import Scroll from 'base/scroll/scroll'
 import SongList from 'base/song-list/song-list'
+import { prefixStyle } from 'common/js/dom'
 
 const RESERVED_HEIGHT = 40
+const transform = prefixStyle('transform')
+const backdrop = prefixStyle('backdrop-filter')
+
 export default {
   components: { Scroll, SongList },
   props: {
@@ -75,17 +82,38 @@ export default {
     offsetY (newY) {
       let transY = Math.max(newY, this.minTranslate)
       let zIndex = 0
-      this.$refs.bgSongs.style['transform'] = `translate3d(0,${transY}px,0)`
-      this.$refs.bgSongs.style['webkitTransform'] = `translate3d(0,${transY}px,0)`
+      let paddingTop = '70%'
+      let imgHeightEqualReservedHeight = false
 
+      let precentage = Math.abs(newY / this.imgHeight)
+      let imgScale = 1 + precentage
+
+      // 上拉的模糊值
+      let blur = Math.min(20 * precentage, 20)
+
+      this.$refs.bgSongs.style[transform] = `translate3d(0,${transY}px,0)`
+
+      // 在滚动到距离顶部预留距离时发生样式切换，实现跟随滚动
       if (newY < this.minTranslate) {
         zIndex = 10
-        this.$refs.header.style.paddingTop = `${RESERVED_HEIGHT}px`
-        this.$refs.header.style.zIndex = zIndex
+        paddingTop = `${RESERVED_HEIGHT}px`
+        imgHeightEqualReservedHeight = true
       } else {
-        this.$refs.header.style.paddingTop = '70%'
+        imgHeightEqualReservedHeight = false
       }
-      this.$refs.header.style.zIndex = zIndex
+      if (imgHeightEqualReservedHeight !== this.imgHeightEqualReservedHeight) {
+        this.$refs.header.style.paddingTop = paddingTop
+        this.$refs.header.style.zIndex = zIndex
+      }
+      this.imgHeightEqualReservedHeight = imgHeightEqualReservedHeight
+
+      if (newY > 0) {
+        // 列表下拉时图片放大
+        this.$refs.header.style[transform] = `scale(${imgScale})`
+      } else {
+        // 上拉时IOS实现高斯模糊
+        this.$refs.header.style[backdrop] = `${blur}px`
+      }
     }
   }
 }
@@ -124,12 +152,13 @@ export default {
     font-size: $font-size-large
     color: $color-text
   .header
-    position relative
+    position: relative
     top: 0
     width: 100%
     height: 0
     padding-top: 70%
     background-size: cover
+    transform-origin: top
     .filter
       position: absolute
       top: 0
@@ -138,9 +167,9 @@ export default {
       height: 100%
       background: rgba(7, 17, 27, 0.4)
   .bg-songs
-    position relative
-    height 100%
-    width 100%
+    position: relative
+    height: 100%
+    width: 100%
     background: $color-background
   .scroll
     position: absolute

@@ -3,7 +3,6 @@ import getUid from 'common/js/uid'
 import { commonParams, ERR_OK } from 'api/configs'
 
 const debug = process.env.NODE_ENV !== 'production'
-console.log(process.env.NODE_ENV)
 
 export function getSongsUrl (songs) {
   let url = debug
