@@ -1,12 +1,17 @@
 <template>
   <div class="music-list">
-    <div class="back">
+    <div class="back"
+         @click="back">
       <i class="icon-back"></i>
     </div>
     <h1 class="title">{{title}}</h1>
     <div class="header"
          :style="bgImg"
          ref="header">
+      <div class="play-btn" ref="playBtn" v-show="songs.length">
+        <i class="icon-play"></i>
+        <span class="text">随机播放全部</span>
+      </div>
       <div class="filter"></div>
     </div>
     <div class="bg-songs"
@@ -18,6 +23,9 @@
             @scroll="onScroll"
             ref="scroll">
       <song-list :songs="songs"></song-list>
+      <div class="loading-wrap">
+        <loading v-if="!songs.length"></loading>
+      </div>
     </scroll>
   </div>
 </template>
@@ -26,13 +34,14 @@
 import Scroll from 'base/scroll/scroll'
 import SongList from 'base/song-list/song-list'
 import { prefixStyle } from 'common/js/dom'
+import Loading from 'base/loading/loading'
 
 const RESERVED_HEIGHT = 40
 const transform = prefixStyle('transform')
 const backdrop = prefixStyle('backdrop-filter')
 
 export default {
-  components: { Scroll, SongList },
+  components: { Scroll, SongList, Loading },
   props: {
     title: {
       type: String,
@@ -70,6 +79,9 @@ export default {
     },
     onScroll (pos) {
       this.offsetY = pos.y
+    },
+    back () {
+      this.$router.back()
     }
   },
   data () {
@@ -84,6 +96,7 @@ export default {
       let zIndex = 0
       let paddingTop = '70%'
       let imgHeightEqualReservedHeight = false
+      let playBtnDisplay = ''
 
       let precentage = Math.abs(newY / this.imgHeight)
       let imgScale = 1 + precentage
@@ -98,12 +111,14 @@ export default {
         zIndex = 10
         paddingTop = `${RESERVED_HEIGHT}px`
         imgHeightEqualReservedHeight = true
+        playBtnDisplay = 'none'
       } else {
         imgHeightEqualReservedHeight = false
       }
       if (imgHeightEqualReservedHeight !== this.imgHeightEqualReservedHeight) {
         this.$refs.header.style.paddingTop = paddingTop
         this.$refs.header.style.zIndex = zIndex
+        this.$refs.playBtn.style.display = playBtnDisplay
       }
       this.imgHeightEqualReservedHeight = imgHeightEqualReservedHeight
 
@@ -159,6 +174,31 @@ export default {
     padding-top: 70%
     background-size: cover
     transform-origin: top
+    .play-btn
+      position: absolute
+      bottom: 20px
+      left: 50%
+      width: 135px
+      height: 32px
+      transform: translateX(-50%)
+      font-size: 0
+      text-align: center
+      border-radius: 100px
+      z-index: 50
+      color: $color-theme
+      border: 1px solid $color-theme
+      box-sizing: border-box
+      .icon-play
+        display: inline-block
+        vertical-align: top
+        line-height: 32px
+        margin-right: 6px
+        font-size: $font-size-medium-x
+      .text
+        display: inline-block
+        vertical-align: top
+        line-height: 32px
+        font-size: $font-size-small
     .filter
       position: absolute
       top: 0
@@ -176,4 +216,10 @@ export default {
     left: 0
     width: 100%
     bottom: 0
+    .loading-wrap
+      position absolute
+      top 50%
+      left 50%
+      transform:translate(-50%,-50%)
+
 </style>
