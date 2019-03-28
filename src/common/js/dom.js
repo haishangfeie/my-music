@@ -34,6 +34,7 @@ let vendor = (() => {
     ms: 'msTransform',
     standard: 'transform'
   }
+
   if (domStyle[transformNames.standard] !== undefined) {
     return 'standard'
   } else {
@@ -53,6 +54,6 @@ export function prefixStyle (style) {
   if (vendor === 'standard') {
     return style
   } else {
-    return vendor + style.charAt(0) + style.strsub(1)
+    return vendor + style.charAt(0).toUpperCase() + style.substr(1)
   }
 }
