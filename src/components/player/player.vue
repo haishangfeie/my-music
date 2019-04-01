@@ -1,0 +1,347 @@
+<template>
+  <div class="player"
+       v-show="playlist.length">
+    <transition name="normal"
+                @enter="enter"
+                @after-enter="afterEnter"
+                @leave="leave"
+                @after-leave="afterLeave">
+      <div class="normal-player"
+           v-show="fullScreen">
+        <div class="background">
+          <img width="100%"
+               height="100%"
+               :src="currentSong.image"
+               alt="">
+        </div>
+        <div class="top">
+          <h1 class="title">{{currentSong.name}}</h1>
+          <h2 class="subtitle">{{currentSong.singer}}</h2>
+          <div class="back"
+               @click="back">
+            <i class="icon-back"></i>
+          </div>
+        </div>
+        <div class="middle">
+          <div class="middle-l">
+            <div class="cd-wrapper"
+                 ref="cdWrapper">
+              <div class="cd">
+                <img class="img"
+                     :src="currentSong.image"
+                     alt="">
+              </div>
+            </div>
+            <div class="playing-lyric-wrapper">
+              <div class="playing-lyric"></div>
+            </div>
+          </div>
+          <div class="middle-r"></div>
+        </div>
+        <div class="bottom">
+          <div class="dot-wrapper">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+          </div>
+          <div class="progress-wrapper"></div>
+          <div class="operators">
+            <div class="icon-wrap i-left">
+              <i class="icon-sequence"></i>
+            </div>
+            <div class="icon-wrap i-left">
+              <i class="icon-prev"></i>
+            </div>
+            <div class="icon-wrap i-center">
+              <i class="icon-play"></i>
+            </div>
+            <div class="icon-wrap i-right">
+              <i class="icon-next"></i>
+            </div>
+            <div class="icon-wrap i-right">
+              <i class="icon-not-favorite"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+    <transition name="mini">
+      <div class="mini-player"
+           v-show="!fullScreen"
+           @click="open">
+        <div class="icon">
+          <img class="img"
+               width="100%"
+               height="100%"
+               :src="currentSong.image"
+               alt="">
+        </div>
+        <div class="text">
+          <h1 class="song-name">不要说话</h1>
+          <p class="desc">陈奕迅</p>
+        </div>
+        <div class="control">
+        </div>
+        <div class="control">
+          <i class="icon-playlist"></i>
+        </div>
+      </div>
+    </transition>
+  </div>
+</template>
+
+<script>
+import { mapGetters, mapMutations } from 'vuex'
+import animations from 'create-keyframe-animation'
+import { prefixStyle } from 'common/js/dom'
+
+const transform = prefixStyle('transform')
+
+export default {
+  computed: {
+    ...mapGetters([
+      'playlist',
+      'fullScreen',
+      'currentSong'
+    ])
+  },
+  methods: {
+    back () {
+      this.setFullScreen(false)
+    },
+    open () {
+      this.setFullScreen(true)
+    },
+    enter (el, done) {
+      let { x, y, scale } = this.getPosAndScale()
+      let animation = {
+        0: {
+          transform: `translate3d(${x}px,${y}px,0) scale(${scale})`
+        },
+        60: {
+          transform: `translate3d(0,0,0) scale(1.1)`
+        },
+        100: {
+          transform: `translate3d(0,0,0) scale(1)`
+        }
+      }
+      animations.registerAnimation({
+        name: 'move',
+        animation: animation,
+        presets: {
+          duration: 400,
+          easing: 'linear'
+        }
+      })
+      animations.runAnimation(this.$refs.cdWrapper, 'move', done)
+    },
+    afterEnter () {
+      this.$refs.cdWrapper.style.animation = ''
+    },
+    leave (el, done) {
+      let { x, y, scale } = this.getPosAndScale()
+      const cdWrapper = this.$refs.cdWrapper
+      cdWrapper.style.transition = 'transform 0.4s'
+      cdWrapper.style[transform] = `translate3d(${x}px,${y}px,0) scale(${scale})`
+      const timer = setTimeout(done, 400)
+      cdWrapper.addEventListener('transitionend', () => {
+        clearTimeout(timer)
+        done()
+      })
+    },
+    afterLeave () {
+      const cdWrapper = this.$refs.cdWrapper
+      cdWrapper.style.transition = ''
+      cdWrapper.style[transform] = ''
+    },
+    getPosAndScale () {
+      const miniLeft = 40
+      const miniBottom = 30
+      const miniWidth = 40
+      const normalOffsetTop = 85
+      const normalWidth = window.innerWidth * 0.8
+      const normalLeft = window.innerWidth / 2
+      const normalBottom = window.innerHeight - normalOffsetTop - normalWidth / 2
+      return {
+        x: -(normalLeft - miniLeft),
+        y: normalBottom - miniBottom,
+        scale: miniWidth / normalWidth
+      }
+    },
+    ...mapMutations({
+      setFullScreen: 'SET_FULL_SCREEN'
+    })
+  }
+}
+</script>
+
+<style scoped lang="stylus">
+@import '~styl/variable'
+@import '~styl/mixin'
+.player
+  .normal-player
+    position: fixed
+    top: 0
+    bottom: 0
+    left: 0
+    right: 0
+    background: $color-background
+    z-index: 100
+    &.normal-enter-active, &.normal-leave-active
+      transition: opacity 0.4s
+      .top, .bottom
+        transition: transform 0.4s cubic-bezier(0.86, 0.18, 0.82, 1.32)
+    &.normal-enter, &.normal-leave-to
+      opacity: 0
+      .top
+        transform: translate3d(0, -100%, 0)
+      .bottom
+        transform: translate3d(0, 100%, 0)
+    .background
+      position: absolute
+      top: 0
+      left: 0
+      bottom: 0
+      right: 0
+      filter: blur(20px)
+      opacity: 0.6
+      z-index: -1
+    .top
+      padding: 0 60px
+      text-align: center
+      .title
+        no-wrap()
+        line-height: 40px
+        font-size: $font-size-large
+        color: $color-text
+      .subtitle
+        line-height: 20px
+        font-size: $font-size-medium
+        color: $color-text
+      .back
+        position: absolute
+        left: 6px
+        top: 0
+        .icon-back
+          display: block
+          padding: 9px
+          font-size: 22px
+          color: $color-theme
+          transform: rotate(-90deg)
+    .middle
+      position: absolute
+      width: 100%
+      left: 0
+      top: 85px
+      bottom: 170px
+      .middle-l
+        position: relative
+        padding-top: 80%
+        height: 0
+        .cd-wrapper
+          position: absolute
+          left: 10%
+          top: 0
+          width: 80%
+          box-sizing: border-box
+          height: 100%
+          .cd
+            .img
+              position: absolute
+              left: 0
+              top: 0
+              width: 100%
+              height: 100%
+              box-sizing: border-box
+              border-radius: 50%
+              border: 10px solid rgba(255, 255, 255, 0.1)
+        .playing-lyric-wrapper
+          width: 80%
+          margin: 30px auto 0 auto
+          overflow: hidden
+          text-align: center
+          .playing-lyric
+            height: 20px
+            line-height: 20px
+            font-size: $font-size-medium
+            color: $color-text-l
+    .bottom
+      position: absolute
+      bottom: 50px
+      width: 100%
+      .dot-wrapper
+        font-size: 0
+        text-align: center
+        .dot
+          display: inline-block
+          vertical-align: middle
+          margin: 0 4px
+          width: 8px
+          height: 8px
+          border-radius: 50%
+          background: rgba(255, 255, 255, 0.5)
+          &.active
+            width: 20px
+            border-radius: 5px
+            background: rgba(255, 255, 255, 0.8)
+      .progress-wrapper
+        padding: 10px 0
+      .operators
+        display: flex
+        align-items: center
+        color: $color-theme
+        .icon-wrap
+          flex: 1
+          &.i-left
+            text-align: right
+          &.i-center
+            text-align: center
+            padding: 0 20px
+            i
+              font-size: 40px
+          &.i-right
+            text-align: left
+          i
+            font-size: 30px
+  .mini-player
+    position: fixed
+    left: 0
+    bottom: 0
+    z-index: 180
+    display: flex
+    width: 100%
+    height: 60px
+    background: $color-highlight-background
+    align-items: center
+    &.mini-enter-active, &.mini-leave-active
+      transition: opacity 0.4s
+    &.mini-enter, &.mini-leave-to
+      opacity: 0
+    .icon
+      flex: 0 0 40px
+      width: 40px
+      height: 40px
+      padding: 0 10px 0 20px
+      .img
+        border-radius: 50%
+    .text
+      flex: 1
+      overflow: hidden
+      .song-name
+        margin-bottom: 2px
+        font-size: $font-size-medium
+        color: $color-text
+        no-wrap()
+        line-height: 20px
+      .desc
+        no-wrap()
+        font-size: $font-size-small
+        color: $color-text-d
+        line-height: 20px
+    .control
+      flex: 0 0 30px
+      width: 30px
+      padding: 0 10px
+      .icon-playlist
+        font-size: 30px
+        color: $color-theme-d
+</style>

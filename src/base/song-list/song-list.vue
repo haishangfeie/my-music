@@ -1,6 +1,6 @@
 <template>
   <ul class="song-list">
-    <li class="song"
+    <li @click="selectItem(song,index)" class="song"
         v-for="(song,index) in songs"
         :key="index">
       <h2 class="name">{{song.name}}</h2>
@@ -26,6 +26,9 @@ export default {
       }
       let { singer = '', album = '' } = song
       return `${singer}·${album}`
+    },
+    selectItem (item, index) {
+      this.$emit('select', item, index)
     }
   }
 }

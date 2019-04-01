@@ -22,7 +22,7 @@
             :listenScroll="true"
             @scroll="onScroll"
             ref="scroll">
-      <song-list :songs="songs"></song-list>
+      <song-list @select="selectItem" :songs="songs"></song-list>
       <div class="loading-wrap">
         <loading v-if="!songs.length"></loading>
       </div>
@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 import Scroll from 'base/scroll/scroll'
 import SongList from 'base/song-list/song-list'
 import { prefixStyle } from 'common/js/dom'
@@ -82,7 +83,16 @@ export default {
     },
     back () {
       this.$router.back()
-    }
+    },
+    selectItem (item, index) {
+      // 修改播放器的状态
+      this.selectPlay({
+        list: this.songs, index
+      })
+    },
+    ...mapActions([
+      'selectPlay'
+    ])
   },
   data () {
     return {
