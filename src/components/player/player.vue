@@ -28,6 +28,7 @@
                  ref="cdWrapper">
               <div class="cd">
                 <img class="img"
+                     :class="cdCls"
                      :src="currentSong.image"
                      alt="">
               </div>
@@ -52,7 +53,8 @@
               <i class="icon-prev"></i>
             </div>
             <div class="icon-wrap i-center">
-              <i class="icon-play"></i>
+              <i @click="togglePlay"
+                 :class="playIcon"></i>
             </div>
             <div class="icon-wrap i-right">
               <i class="icon-next"></i>
@@ -73,6 +75,7 @@
                width="100%"
                height="100%"
                :src="currentSong.image"
+               :class="cdCls"
                alt="">
         </div>
         <div class="text">
@@ -80,12 +83,16 @@
           <p class="desc">陈奕迅</p>
         </div>
         <div class="control">
+          <i @click.stop="togglePlay"
+             :class="miniIcon"></i>
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
+    <audio ref="audio"
+           :src="currentSong.url"></audio>
   </div>
 </template>
 
@@ -98,10 +105,20 @@ const transform = prefixStyle('transform')
 
 export default {
   computed: {
+    playIcon () {
+      return this.playing ? 'icon-pause' : 'icon-play'
+    },
+    cdCls () {
+      return this.playing ? 'play' : 'play pause'
+    },
+    miniIcon () {
+      return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+    },
     ...mapGetters([
       'playlist',
       'fullScreen',
-      'currentSong'
+      'currentSong',
+      'playing'
     ])
   },
   methods: {
@@ -167,9 +184,26 @@ export default {
         scale: miniWidth / normalWidth
       }
     },
+    togglePlay () {
+      this.setPlayingState(!this.playing)
+    },
     ...mapMutations({
-      setFullScreen: 'SET_FULL_SCREEN'
+      setFullScreen: 'SET_FULL_SCREEN',
+      setPlayingState: 'SET_PLAYING_STATE'
     })
+  },
+  watch: {
+    currentSong () {
+      this.$nextTick(() => {
+        this.$refs.audio.play()
+      })
+    },
+    playing (newPlaying) {
+      const audio = this.$refs.audio
+      this.$nextTick(() => {
+        newPlaying ? audio.play() : audio.pause()
+      })
+    }
   }
 }
 </script>
@@ -254,6 +288,10 @@ export default {
               box-sizing: border-box
               border-radius: 50%
               border: 10px solid rgba(255, 255, 255, 0.1)
+            .play
+              animation: rotate 20s linear infinite
+            .pause
+              animation-play-state:paused
         .playing-lyric-wrapper
           width: 80%
           margin: 30px auto 0 auto
@@ -323,6 +361,10 @@ export default {
       padding: 0 10px 0 20px
       .img
         border-radius: 50%
+      .play
+        animation: rotate 20s linear infinite
+      .pause
+        animation-play-state:paused
     .text
       flex: 1
       overflow: hidden
@@ -341,7 +383,12 @@ export default {
       flex: 0 0 30px
       width: 30px
       padding: 0 10px
-      .icon-playlist
+      i
         font-size: 30px
         color: $color-theme-d
+@keyframes rotate
+  0%
+    transform: rotate(0)
+  100%
+    transform: rotate(360deg)
 </style>

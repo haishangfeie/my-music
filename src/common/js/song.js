@@ -50,7 +50,7 @@ export function processSongsUrl (songs) {
     return Promise.resolve(songs)
   }
   return getSongsUrl(songs).then(purlMap => {
-    songs.filter(song => {
+    songs = songs.filter(song => {
       let purl = purlMap[song.mid]
       if (purl) {
         song.url =
