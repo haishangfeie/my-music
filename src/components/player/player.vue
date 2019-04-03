@@ -49,15 +49,20 @@
             <div class="icon-wrap i-left">
               <i class="icon-sequence"></i>
             </div>
-            <div class="icon-wrap i-left">
-              <i class="icon-prev"></i>
+            <div class="icon-wrap i-left"
+                 :class="disableCls">
+              <i @click="playPrev"
+                 class="icon-prev"></i>
             </div>
-            <div class="icon-wrap i-center">
+            <div class="icon-wrap i-center"
+                 :class="disableCls">
               <i @click="togglePlay"
                  :class="playIcon"></i>
             </div>
-            <div class="icon-wrap i-right">
-              <i class="icon-next"></i>
+            <div class="icon-wrap i-right"
+                 :class="disableCls">
+              <i @click="playNext"
+                 class="icon-next"></i>
             </div>
             <div class="icon-wrap i-right">
               <i class="icon-not-favorite"></i>
@@ -92,7 +97,9 @@
       </div>
     </transition>
     <audio ref="audio"
-           :src="currentSong.url"></audio>
+           :src="currentSong.url"
+           @canplay="playReady"
+           @error="playError" @ended="playEnd"></audio>
   </div>
 </template>
 
@@ -104,6 +111,11 @@ import { prefixStyle } from 'common/js/dom'
 const transform = prefixStyle('transform')
 
 export default {
+  data () {
+    return {
+      songReady: false
+    }
+  },
   computed: {
     playIcon () {
       return this.playing ? 'icon-pause' : 'icon-play'
@@ -114,11 +126,15 @@ export default {
     miniIcon () {
       return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
     },
+    disableCls () {
+      return this.songReady ? '' : 'disable'
+    },
     ...mapGetters([
       'playlist',
       'fullScreen',
       'currentSong',
-      'playing'
+      'playing',
+      'currentIndex'
     ])
   },
   methods: {
@@ -185,11 +201,57 @@ export default {
       }
     },
     togglePlay () {
+      // 歌曲ready以前不允许切换歌曲，避免报错
+      if (!this.songReady) {
+        return
+      }
       this.setPlayingState(!this.playing)
+    },
+    playPrev () {
+      // 歌曲ready以前不允许切换歌曲，避免报错
+      if (!this.songReady) {
+        return
+      }
+      let index = this.currentIndex - 1
+      if (index === -1) {
+        index = this.playlist.length - 1
+      }
+      this.setCurrentIndex(index)
+      if (!this.playing) {
+        this.togglePlay()
+      }
+      // 歌曲发生切换，将ready设为false表示歌曲还没有ready
+      this.songReady = false
+    },
+    playNext () {
+      // 歌曲ready以前不允许切换歌曲，避免报错
+      if (!this.songReady) {
+        return
+      }
+      let index = this.currentIndex + 1
+      if (index === this.playlist.length) {
+        index = 0
+      }
+      this.setCurrentIndex(index)
+      if (!this.playing) {
+        this.togglePlay()
+      }
+      // 歌曲发生切换，将ready设为false表示歌曲还没有ready
+      this.songReady = false
+    },
+    playEnd () { this.playNext() },
+    playReady () {
+      // 歌曲准备好了才将ready设为true
+      this.songReady = true
+    },
+    playError () {
+      // 当出现错误时，歌曲就不会ready了，这时为了产品的正常使用，要将ready设会true，这样用户才能继续进行操作
+      this.songReady = true
     },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
-      setPlayingState: 'SET_PLAYING_STATE'
+      setPlayingState: 'SET_PLAYING_STATE',
+      setCurrentIndex: 'SET_CURRENT_INDEX'
     })
   },
   watch: {
@@ -291,7 +353,7 @@ export default {
             .play
               animation: rotate 20s linear infinite
             .pause
-              animation-play-state:paused
+              animation-play-state: paused
         .playing-lyric-wrapper
           width: 80%
           margin: 30px auto 0 auto
@@ -338,6 +400,8 @@ export default {
               font-size: 40px
           &.i-right
             text-align: left
+          &.disable
+            color:$color-theme-d
           i
             font-size: 30px
   .mini-player
@@ -364,7 +428,7 @@ export default {
       .play
         animation: rotate 20s linear infinite
       .pause
-        animation-play-state:paused
+        animation-play-state: paused
     .text
       flex: 1
       overflow: hidden
