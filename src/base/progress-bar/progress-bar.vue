@@ -1,13 +1,14 @@
 <template>
   <div class="progress-bar">
     <div class="bar-inner"
-         ref="barInner"  @click="changProgress">
+         ref="barInner"
+         @click="changProgress">
       <div class="progress"
            ref="progress"></div>
       <div class="progress-btn-wrap"
            ref="progressBtnWrap"
-           @touchstart="progressBtnStart"
-           @touchmove="progressBtnMove"
+           @touchstart.prevent="progressBtnStart"
+           @touchmove.prevent="progressBtnMove"
            @touchend="progressBtnEnd">
         <div class="progress-btn"></div>
       </div>
@@ -62,11 +63,10 @@ export default {
       this.touch = {}
       this.$emit('progressChange', this.$refs.progress.clientWidth / (this.$refs.barInner.clientWidth - progressBtnWidth))
     },
-    changProgress(e){
-      let offsetWidth = Math.min((this.$refs.barInner.clientWidth - progressBtnWidth),Math.max(0,e.clientX-this.$refs.barInner.offsetLeft - progressBtnWidth/2));
-     this.$emit('progressChange', offsetWidth / (this.$refs.barInner.clientWidth - progressBtnWidth))
-     this._offset(offsetWidth)
-
+    changProgress (e) {
+      let offsetWidth = Math.min((this.$refs.barInner.clientWidth - progressBtnWidth), Math.max(0, e.clientX - this.$refs.barInner.offsetLeft - progressBtnWidth / 2))
+      this.$emit('progressChange', offsetWidth / (this.$refs.barInner.clientWidth - progressBtnWidth))
+      this._offset(offsetWidth)
     },
     _offset (offsetWidth) {
       this.$refs.progress.style.width = `${offsetWidth}px`

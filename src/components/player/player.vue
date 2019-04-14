@@ -47,7 +47,8 @@
           <div class="progress-wrapper">
             <span class="time current-time">{{format(currentTime)}}</span>
             <div class="progress-bar-wrap">
-              <progress-bar :percentage="percentage" @progressChange="changeProgress"></progress-bar>
+              <progress-bar :percentage="percentage"
+                            @progressChange="changeProgress"></progress-bar>
             </div>
             <span class="time total-time">{{format(currentSong.duration)}}</span>
           </div>
@@ -90,12 +91,16 @@
                alt="">
         </div>
         <div class="text">
-          <h1 class="song-name">不要说话</h1>
-          <p class="desc">陈奕迅</p>
+          <h1 class="song-name">{{currentSong.name}}</h1>
+          <p class="desc">{{currentSong.singer}}</p>
         </div>
         <div class="control">
-          <i @click.stop="togglePlay"
-             :class="miniIcon"></i>
+          <progress-circle :diameter="32"
+                           :percentage="percentage">
+            <i @click.stop="togglePlay" class="control-play-icon"
+               :class="miniIcon"></i>
+          </progress-circle>
+
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
@@ -113,6 +118,8 @@
 
 <script>
 import ProgressBar from 'base/progress-bar/progress-bar'
+import ProgressCircle from 'base/progress-circle/progress-circle'
+
 import { mapGetters, mapMutations } from 'vuex'
 import animations from 'create-keyframe-animation'
 import { prefixStyle } from 'common/js/dom'
@@ -127,7 +134,8 @@ export default {
     }
   },
   components: {
-    ProgressBar
+    ProgressBar,
+    ProgressCircle
   },
   computed: {
     playIcon () {
@@ -495,12 +503,16 @@ export default {
         color: $color-text-d
         line-height: 20px
     .control
-      flex: 0 0 30px
-      width: 30px
+      flex: 0 0 32px
+      width: 32px
       padding: 0 10px
       i
-        font-size: 30px
+        font-size: 32px
         color: $color-theme-d
+        &.control-play-icon
+          position absolute
+          left 0
+          top 0
 @keyframes rotate
   0%
     transform: rotate(0)
