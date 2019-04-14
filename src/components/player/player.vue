@@ -44,7 +44,13 @@
             <span class="dot active"></span>
             <span class="dot"></span>
           </div>
-          <div class="progress-wrapper"></div>
+          <div class="progress-wrapper">
+            <span class="time current-time">{{format(currentTime)}}</span>
+            <div class="progress-bar-wrap">
+              <progress-bar :percentage="percentage" @progressChange="changeProgress"></progress-bar>
+            </div>
+            <span class="time total-time">{{format(currentSong.duration)}}</span>
+          </div>
           <div class="operators">
             <div class="icon-wrap i-left">
               <i class="icon-sequence"></i>
@@ -99,11 +105,14 @@
     <audio ref="audio"
            :src="currentSong.url"
            @canplay="playReady"
-           @error="playError" @ended="playEnd"></audio>
+           @error="playError"
+           @ended="playEnd"
+           @timeupdate="updateTime"></audio>
   </div>
 </template>
 
 <script>
+import ProgressBar from 'base/progress-bar/progress-bar'
 import { mapGetters, mapMutations } from 'vuex'
 import animations from 'create-keyframe-animation'
 import { prefixStyle } from 'common/js/dom'
@@ -113,8 +122,12 @@ const transform = prefixStyle('transform')
 export default {
   data () {
     return {
-      songReady: false
+      songReady: false,
+      currentTime: 0
     }
+  },
+  components: {
+    ProgressBar
   },
   computed: {
     playIcon () {
@@ -128,6 +141,9 @@ export default {
     },
     disableCls () {
       return this.songReady ? '' : 'disable'
+    },
+    percentage () {
+      return this.currentTime / this.currentSong.duration
     },
     ...mapGetters([
       'playlist',
@@ -247,6 +263,28 @@ export default {
     playError () {
       // 当出现错误时，歌曲就不会ready了，这时为了产品的正常使用，要将ready设会true，这样用户才能继续进行操作
       this.songReady = true
+    },
+    updateTime (e) {
+      this.currentTime = e.target.currentTime
+    },
+    format (interval) {
+      interval = interval | 0
+      let min = interval / 60 | 0
+      let second = interval % 60
+      return `${min}:${this._pad(second)}`
+    },
+    changeProgress (progress) {
+      this.$refs.audio.currentTime = this.currentSong.duration * progress
+      if (!this.playing) {
+        this.togglePlay()
+      }
+    },
+    _pad (num, n = 2) {
+      let len = num.toString().length
+      if (len < n) {
+        num = '0' + num
+      }
+      return num
     },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
@@ -384,7 +422,20 @@ export default {
             border-radius: 5px
             background: rgba(255, 255, 255, 0.8)
       .progress-wrapper
+        display: flex
         padding: 10px 0
+        width: 80%
+        margin: 0px auto
+        .time
+          flex: 0 0 30px
+          width: 30px
+          line-height: 30px
+          font-size: 12px
+          color: $color-text
+          &.total-time
+            text-align: right
+        .progress-bar-wrap
+          flex: 1
       .operators
         display: flex
         align-items: center
@@ -401,7 +452,7 @@ export default {
           &.i-right
             text-align: left
           &.disable
-            color:$color-theme-d
+            color: $color-theme-d
           i
             font-size: 30px
   .mini-player
