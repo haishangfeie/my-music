@@ -53,8 +53,8 @@
             <span class="time total-time">{{format(currentSong.duration)}}</span>
           </div>
           <div class="operators">
-            <div class="icon-wrap i-left">
-              <i class="icon-sequence"></i>
+            <div class="icon-wrap i-left" @click="changeMode">
+              <i :class="modeIconCls"></i>
             </div>
             <div class="icon-wrap i-left"
                  :class="disableCls">
@@ -123,6 +123,9 @@ import ProgressCircle from 'base/progress-circle/progress-circle'
 import { mapGetters, mapMutations } from 'vuex'
 import animations from 'create-keyframe-animation'
 import { prefixStyle } from 'common/js/dom'
+import { playMode } from 'common/js/config'
+import { shuffle } from 'common/js/util'
+import { findSongIndex } from 'common/js/song'
 
 const transform = prefixStyle('transform')
 
@@ -153,12 +156,25 @@ export default {
     percentage () {
       return this.currentTime / this.currentSong.duration
     },
+    modeIconCls () {
+      let cls = ''
+      if (this.mode === playMode.sequence) {
+        cls = 'icon-sequence'
+      } else if (this.mode === playMode.loop) {
+        cls = 'icon-loop'
+      } else if (this.mode === playMode.random) {
+        cls = 'icon-random'
+      }
+      return cls
+    },
     ...mapGetters([
       'playlist',
       'fullScreen',
       'currentSong',
       'playing',
-      'currentIndex'
+      'currentIndex',
+      'mode',
+      'sequenceList'
     ])
   },
   methods: {
@@ -263,7 +279,17 @@ export default {
       // 歌曲发生切换，将ready设为false表示歌曲还没有ready
       this.songReady = false
     },
-    playEnd () { this.playNext() },
+    playEnd () {
+      if (this.mode === playMode.loop) {
+        this.playLoop()
+      } else {
+        this.playNext()
+      }
+    },
+    playLoop () {
+      this.$refs.audio.currentTime = 0
+      this.$refs.audio.play()
+    },
     playReady () {
       // 歌曲准备好了才将ready设为true
       this.songReady = true
@@ -287,6 +313,10 @@ export default {
         this.togglePlay()
       }
     },
+    changeMode () {
+      let mode = (this.mode + 1) % 3
+      this.setMode(mode)
+    },
     _pad (num, n = 2) {
       let len = num.toString().length
       if (len < n) {
@@ -297,11 +327,16 @@ export default {
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
       setPlayingState: 'SET_PLAYING_STATE',
-      setCurrentIndex: 'SET_CURRENT_INDEX'
+      setCurrentIndex: 'SET_CURRENT_INDEX',
+      setMode: 'SET_MODE',
+      setPlayList: 'SET_PLAYLIST'
     })
   },
   watch: {
-    currentSong () {
+    currentSong (newSong, oldSong) {
+      if (newSong.id === oldSong.id) {
+        return
+      }
       this.$nextTick(() => {
         this.$refs.audio.play()
       })
@@ -311,6 +346,16 @@ export default {
       this.$nextTick(() => {
         newPlaying ? audio.play() : audio.pause()
       })
+    },
+    mode (newMode) {
+      if (newMode === playMode.random) {
+        let randomList = shuffle(this.sequenceList)
+        this.setCurrentIndex(findSongIndex(randomList, this.currentSong))
+        this.setPlayList(randomList)
+      } else {
+        this.setCurrentIndex(findSongIndex(this.sequenceList, this.currentSong))
+        this.setPlayList(this.sequenceList)
+      }
     }
   }
 }

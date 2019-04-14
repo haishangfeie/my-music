@@ -10,7 +10,7 @@
          ref="header">
       <div class="play-btn" ref="playBtn" v-show="songs.length">
         <i class="icon-play"></i>
-        <span class="text">随机播放全部</span>
+        <span class="text" @click="_playRandom">随机播放全部</span>
       </div>
       <div class="filter"></div>
     </div>
@@ -90,8 +90,12 @@ export default {
         list: this.songs, index
       })
     },
+    _playRandom () {
+      this.playRandom({ list: this.songs })
+    },
     ...mapActions([
-      'selectPlay'
+      'selectPlay',
+      'playRandom'
     ])
   },
   data () {

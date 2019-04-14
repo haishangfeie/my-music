@@ -64,3 +64,9 @@ export function processSongsUrl (songs) {
     return songs
   })
 }
+
+export function findSongIndex (list, song) {
+  return list.findIndex(item => {
+    return item.id === song.id
+  })
+}
