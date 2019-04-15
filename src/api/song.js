@@ -44,8 +44,6 @@ export function getSongsUrl (songs) {
             let urlMid = res.req_0
 
             if (urlMid && urlMid.code === ERR_OK) {
-              console.log(urlMid.data)
-
               let midurlinfo = urlMid.data.midurlinfo
 
               let purlMap = {}
@@ -77,6 +75,26 @@ export function getSongsUrl (songs) {
     }
   })
 }
+
+export function getLyric (mid) {
+  const url = '/api/get-lyric'
+  const data = Object.assign({}, commonParams, {
+    songmid: mid,
+    platform: 'yqq',
+    hostUin: 0,
+    needNewCode: 0,
+    categoryId: 10000000,
+    pcachetime: +new Date(),
+    format: 'json'
+  })
+  return axios.get(url, {
+    params: data
+  })
+    .then(res => {
+      return Promise.resolve(res.data)
+    })
+}
+
 function getUrlMid (mids, types) {
   const guid = getUid()
   return {
