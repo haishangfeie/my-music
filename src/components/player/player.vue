@@ -37,7 +37,14 @@
               <div class="playing-lyric"></div>
             </div>
           </div>
-          <div class="middle-r"></div>
+          <scroll :data="lyric && lyric.lines" class="middle-r" ref="lyricScroll">
+            <div class="lyric-wrap">
+              <p v-for="(line,index) in lyric.lines"
+                 :key="index"
+                 class="text"
+                 :class="{active:lyricIndex === index}" ref="lines">{{line.txt}}</p>
+            </div>
+          </scroll>
         </div>
         <div class="bottom">
           <div class="dot-wrapper">
@@ -53,7 +60,8 @@
             <span class="time total-time">{{format(currentSong.duration)}}</span>
           </div>
           <div class="operators">
-            <div class="icon-wrap i-left" @click="changeMode">
+            <div class="icon-wrap i-left"
+                 @click="changeMode">
               <i :class="modeIconCls"></i>
             </div>
             <div class="icon-wrap i-left"
@@ -97,7 +105,8 @@
         <div class="control">
           <progress-circle :diameter="32"
                            :percentage="percentage">
-            <i @click.stop="togglePlay" class="control-play-icon"
+            <i @click.stop="togglePlay"
+               class="control-play-icon"
                :class="miniIcon"></i>
           </progress-circle>
 
@@ -126,6 +135,8 @@ import { prefixStyle } from 'common/js/dom'
 import { playMode } from 'common/js/config'
 import { shuffle } from 'common/js/util'
 import { findSongIndex } from 'common/js/song'
+import Lyric from 'lyric-parser'
+import Scroll from 'base/scroll/scroll'
 
 const transform = prefixStyle('transform')
 
@@ -133,12 +144,15 @@ export default {
   data () {
     return {
       songReady: false,
-      currentTime: 0
+      currentTime: 0,
+      lyric: {},
+      lyricIndex: 0
     }
   },
   components: {
     ProgressBar,
-    ProgressCircle
+    ProgressCircle,
+    Scroll
   },
   computed: {
     playIcon () {
@@ -324,6 +338,22 @@ export default {
       }
       return num
     },
+    getLyric () {
+      this.currentSong.getLyric().then(lyric => {
+        this.lyric = new Lyric(lyric, this.handler)
+        if (this.lyric) {
+          this.lyric.play()
+        }
+      })
+    },
+    handler ({ lineNum, txt }) {
+      this.lyricIndex = lineNum
+      if (lineNum > 5) {
+        this.$refs.lyricScroll.scrollToElement(this.$refs.lines[lineNum - 5], 1000)
+      } else {
+        this.$refs.lyricScroll.scrollTo(0, 0, 1000)
+      }
+    },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
       setPlayingState: 'SET_PLAYING_STATE',
@@ -337,9 +367,9 @@ export default {
       if (newSong.id === oldSong.id) {
         return
       }
+      this.getLyric()
       this.$nextTick(() => {
         this.$refs.audio.play()
-        this.currentSong.getLyric()
       })
     },
     playing (newPlaying) {
@@ -421,9 +451,14 @@ export default {
       left: 0
       top: 85px
       bottom: 170px
+      font-size: 0
+      white-space: nowrap
       .middle-l
         position: relative
+        display: inline-block
+        vertical-align: top
         padding-top: 80%
+        width: 100%
         height: 0
         .cd-wrapper
           position: absolute
@@ -456,6 +491,23 @@ export default {
             line-height: 20px
             font-size: $font-size-medium
             color: $color-text-l
+      .middle-r
+        display: inline-block
+        width: 100%
+        height: 100%
+        vertical-align: top
+        overflow: hidden
+        transform: translateX(-375px)
+        .lyric-wrap
+          width: 80%
+          margin: 0 auto
+          text-align: center
+          .text
+            line-height: 32px
+            color: $color-text-l
+            font-size: $font-size-medium
+            &.active
+              color: $color-text
     .bottom
       position: absolute
       bottom: 50px
@@ -556,9 +608,9 @@ export default {
         font-size: 32px
         color: $color-theme-d
         &.control-play-icon
-          position absolute
-          left 0
-          top 0
+          position: absolute
+          left: 0
+          top: 0
 @keyframes rotate
   0%
     transform: rotate(0)
