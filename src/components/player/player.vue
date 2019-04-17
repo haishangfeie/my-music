@@ -22,7 +22,10 @@
             <i class="icon-back"></i>
           </div>
         </div>
-        <div class="middle">
+        <div class="middle"
+             @touchstart.prevent="middleTouchStart"
+             @touchmove.prevent="middleTouchMove"
+             @touchend="middleTouchEnd">
           <div class="middle-l">
             <div class="cd-wrapper"
                  ref="cdWrapper">
@@ -37,19 +40,24 @@
               <div class="playing-lyric"></div>
             </div>
           </div>
-          <scroll :data="lyric && lyric.lines" class="middle-r" ref="lyricScroll">
+          <scroll :data="lyric && lyric.lines"
+                  class="middle-r"
+                  ref="lyricScroll">
             <div class="lyric-wrap">
               <p v-for="(line,index) in lyric.lines"
                  :key="index"
                  class="text"
-                 :class="{active:lyricIndex === index}" ref="lines">{{line.txt}}</p>
+                 :class="{active:lyricIndex === index}"
+                 ref="lines">{{line.txt}}</p>
             </div>
           </scroll>
         </div>
         <div class="bottom">
           <div class="dot-wrapper">
-            <span class="dot active"></span>
-            <span class="dot"></span>
+            <span class="dot "
+                  :class="{active:currentTab ==='cd'}"></span>
+            <span class="dot"
+                  :class="{active:currentTab ==='lyric'}"></span>
           </div>
           <div class="progress-wrapper">
             <span class="time current-time">{{format(currentTime)}}</span>
@@ -139,6 +147,7 @@ import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
 
 const transform = prefixStyle('transform')
+const transition = prefixStyle('transition')
 
 export default {
   data () {
@@ -146,8 +155,12 @@ export default {
       songReady: false,
       currentTime: 0,
       lyric: {},
-      lyricIndex: 0
+      lyricIndex: 0,
+      currentTab: 'cd'
     }
+  },
+  created () {
+    this.touch = {}
   },
   components: {
     ProgressBar,
@@ -331,13 +344,6 @@ export default {
       let mode = (this.mode + 1) % 3
       this.setMode(mode)
     },
-    _pad (num, n = 2) {
-      let len = num.toString().length
-      if (len < n) {
-        num = '0' + num
-      }
-      return num
-    },
     getLyric () {
       this.currentSong.getLyric().then(lyric => {
         this.lyric = new Lyric(lyric, this.handler)
@@ -353,6 +359,69 @@ export default {
       } else {
         this.$refs.lyricScroll.scrollTo(0, 0, 1000)
       }
+    },
+    middleTouchStart (e) {
+      this.touch.init = true
+      const touch = e.touches[0]
+      this.touch.pageX = touch.pageX
+      this.touch.pageY = touch.pageY
+    },
+    middleTouchMove (e) {
+      if (!this.touch.init) {
+        return
+      }
+      const touch = e.touches[0]
+      let deltaX = touch.pageX - this.touch.pageX
+      let deltaY = touch.pageY - this.touch.pageY
+
+      // 如果垂直方向的偏移大于水平方向的偏移，此时什么都不做
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        return
+      }
+      let left = this.currentTab === 'cd' ? 0 : -window.innerWidth
+      // 计算右侧的偏移宽度
+
+      let offsetWidth = Math.min(0, Math.max(-window.innerWidth, left + deltaX))
+
+      this.$refs.lyricScroll.$el.style[transform] = `translate3d(${offsetWidth}px,0,0)`
+      this.$refs.lyricScroll.$el.style[transition] = 'none'
+
+      this.touch.percent = Math.abs(offsetWidth) / window.innerWidth
+
+      this.$refs.cdWrapper.style.opacity = `${1 - this.touch.percent}`
+    },
+    middleTouchEnd () {
+      if (!this.touch.init) {
+        return
+      }
+      this.$refs.lyricScroll.$el.style[transition] = 'transform 0.3s'
+      this.$refs.cdWrapper.style[transition] = 'opacity 0.3s'
+      if (this.currentTab === 'cd') {
+        if (this.touch.percent > 0.1) {
+          this.$refs.lyricScroll.$el.style[transform] = `translate3d(${-window.innerWidth}px,0,0)`
+          this.$refs.cdWrapper.style.opacity = '0'
+          this.currentTab = 'lyric'
+        } else {
+          this.$refs.cdWrapper.style.opacity = '1'
+          this.$refs.lyricScroll.$el.style[transform] = `translate3d(0,0,0)`
+        }
+      } else {
+        if (this.touch.percent < 0.9) {
+          this.$refs.cdWrapper.style.opacity = '1'
+          this.$refs.lyricScroll.$el.style[transform] = `translate3d(0,0,0)`
+          this.currentTab = 'cd'
+        } else {
+          this.$refs.cdWrapper.style.opacity = '0'
+          this.$refs.lyricScroll.$el.style[transform] = `translate3d(${-window.innerWidth}px,0,0)`
+        }
+      }
+    },
+    _pad (num, n = 2) {
+      let len = num.toString().length
+      if (len < n) {
+        num = '0' + num
+      }
+      return num
     },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
@@ -497,7 +566,6 @@ export default {
         height: 100%
         vertical-align: top
         overflow: hidden
-        transform: translateX(-375px)
         .lyric-wrap
           width: 80%
           margin: 0 auto
