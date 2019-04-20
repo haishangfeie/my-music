@@ -46,25 +46,33 @@ import Scroll from 'base/scroll/scroll'
 import Loading from 'base/loading/loading'
 import { getRecommend, getDiscList } from 'api/recommend'
 import { ERR_OK } from 'api/configs'
+import { playlistMixin } from 'common/js/mixin'
+
 export default {
+  mixins: [playlistMixin],
   components: {
     Slider,
     Scroll,
     Loading
   },
-  data () {
+  data() {
     return {
       recommends: [],
       discList: []
     }
   },
-  created () {
+  created() {
     this._getRecommend()
     this._getDescList()
   },
 
   methods: {
-    _getRecommend () {
+    handlePlaylist(playlist) {
+      const bottom = playlist.length ? '60px' : '0'
+      this.$refs.scroll.$el.style.bottom = bottom
+      this.$refs.refresh()
+    },
+    _getRecommend() {
       getRecommend()
         .then(res => {
           if (res.code === ERR_OK) {
@@ -72,14 +80,14 @@ export default {
           }
         })
     },
-    _getDescList () {
+    _getDescList() {
       getDiscList().then(res => {
         this.discList = res.data.list
       }).catch(e => {
         console.log(e)
       })
     },
-    imgLoad () {
+    imgLoad() {
       if (!this.checkLoaded) {
         this.$refs.scroll.refresh()
         this.checkLoaded = true
@@ -102,13 +110,13 @@ export default {
     width: 100%
     height: 0
     padding-top: 40%
-    overflow hidden
+    overflow: hidden
     .slider-container
-      position absolute
-      top 0
-      left 0
-      width 100%
-      height 100%
+      position: absolute
+      top: 0
+      left: 0
+      width: 100%
+      height: 100%
   .block
     .title
       height: 65px

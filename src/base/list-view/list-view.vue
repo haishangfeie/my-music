@@ -187,6 +187,9 @@ export default {
     select (item) {
       this.$emit('select', item)
     },
+    refresh () {
+      this.$refs.scroll.refresh()
+    },
     _scrollTo () {
       let index = this.currentIndex
       let scroll = this.$refs.scroll

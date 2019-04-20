@@ -1,5 +1,5 @@
 <template>
-  <div class="music-list">
+  <div class="music-list" ref="musicList">
     <div class="back"
          @click="back">
       <i class="icon-back"></i>
@@ -8,9 +8,12 @@
     <div class="header"
          :style="bgImg"
          ref="header">
-      <div class="play-btn" ref="playBtn" v-show="songs.length">
+      <div class="play-btn"
+           ref="playBtn"
+           v-show="songs.length">
         <i class="icon-play"></i>
-        <span class="text" @click="_playRandom">随机播放全部</span>
+        <span class="text"
+              @click="_playRandom">随机播放全部</span>
       </div>
       <div class="filter"></div>
     </div>
@@ -22,7 +25,8 @@
             :listenScroll="true"
             @scroll="onScroll"
             ref="scroll">
-      <song-list @select="selectItem" :songs="songs"></song-list>
+      <song-list @select="selectItem"
+                 :songs="songs"></song-list>
       <div class="loading-wrap">
         <loading v-if="!songs.length"></loading>
       </div>
@@ -35,6 +39,8 @@ import { mapActions } from 'vuex'
 import Scroll from 'base/scroll/scroll'
 import SongList from 'base/song-list/song-list'
 import { prefixStyle } from 'common/js/dom'
+import { playlistMixin } from 'common/js/mixin'
+
 import Loading from 'base/loading/loading'
 
 const RESERVED_HEIGHT = 40
@@ -42,6 +48,7 @@ const transform = prefixStyle('transform')
 const backdrop = prefixStyle('backdrop-filter')
 
 export default {
+  mixins: [playlistMixin],
   components: { Scroll, SongList, Loading },
   props: {
     title: {
@@ -89,6 +96,11 @@ export default {
       this.selectPlay({
         list: this.songs, index
       })
+    },
+    handlePlaylist (playlist) {
+      let bottom = playlist.length ? '60px' : '0'
+      this.$refs.musicList.style.bottom = bottom
+      this.$refs.scroll.refresh()
     },
     _playRandom () {
       this.playRandom({ list: this.songs })
@@ -231,9 +243,8 @@ export default {
     width: 100%
     bottom: 0
     .loading-wrap
-      position absolute
-      top 50%
-      left 50%
-      transform:translate(-50%,-50%)
-
+      position: absolute
+      top: 50%
+      left: 50%
+      transform: translate(-50%, -50%)
 </style>
