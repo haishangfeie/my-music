@@ -1,5 +1,6 @@
 <template>
-  <div class="music-list" ref="musicList">
+  <div class="music-list"
+       ref="musicList">
     <div class="back"
          @click="back">
       <i class="icon-back"></i>
@@ -25,7 +26,8 @@
             :listenScroll="true"
             @scroll="onScroll"
             ref="scroll">
-      <song-list @select="selectItem"
+      <song-list :isRank="isRank"
+                 @select="selectItem"
                  :songs="songs"></song-list>
       <div class="loading-wrap">
         <loading v-if="!songs.length"></loading>
@@ -64,6 +66,10 @@ export default {
     bgUrl: {
       type: String,
       default: ''
+    },
+    isRank: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
