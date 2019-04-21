@@ -275,7 +275,7 @@ export default {
         return
       }
       this.setPlayingState(!this.playing)
-      if (this.lyric) {
+      if (this.lyric.togglePlay) {
         this.lyric.togglePlay()
       }
     },
@@ -334,7 +334,7 @@ export default {
     },
     playLoop () {
       this.$refs.audio.currentTime = 0
-      if (this.lyric) {
+      if (this.lyric.seek) {
         this.lyric.seek(0)
       }
       this.$refs.audio.play()
@@ -362,7 +362,7 @@ export default {
       if (!this.playing) {
         this.togglePlay()
       }
-      if (this.lyric) {
+      if (this.lyric.seek) {
         this.lyric.seek(currentTime * 1000)
       }
     },
@@ -374,7 +374,7 @@ export default {
       this.currentSong.getLyric()
         .then(lyric => {
           this.lyric = new Lyric(lyric, this.handler)
-          if (this.lyric) {
+          if (this.lyric.play) {
             this.lyric.play()
           }
         })
@@ -473,16 +473,16 @@ export default {
         this.lyric.stop()
       }
 
-      this.$nextTick(() => {
+      setTimeout(() => {
         this.$refs.audio.play()
         this.getLyric()
-      })
+      }, 1000)
     },
     playing (newPlaying) {
       const audio = this.$refs.audio
-      setTimeout(() => {
+      this.$nextTick(() => {
         newPlaying ? audio.play() : audio.pause()
-      }, 1000)
+      })
     },
     mode (newMode) {
       if (newMode === playMode.random) {
