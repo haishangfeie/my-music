@@ -1,43 +1,46 @@
 <template>
-  <scroll class="recommend"
-          :data="discList"
-          ref="scroll">
-    <div>
-      <div v-if="recommends.length"
-           class="slider-wrap">
-        <div class="slider-container">
-          <slider>
-            <div v-for="(item,index) in recommends"
-                 :key="index">
-              <a :href="item.linkUrl">
-                <img @load="imgLoad"
-                     :src="item.picUrl">
-              </a>
-            </div>
-          </slider>
+  <div>
+    <scroll class="recommend"
+            :data="discList"
+            ref="scroll">
+      <div>
+        <div v-if="recommends.length"
+             class="slider-wrap">
+          <div class="slider-container">
+            <slider>
+              <div v-for="(item,index) in recommends"
+                   :key="index">
+                <a :href="item.linkUrl">
+                  <img @load="imgLoad"
+                       :src="item.picUrl">
+                </a>
+              </div>
+            </slider>
+          </div>
+        </div>
+        <div class="block">
+          <h1 class="title">热门歌单推荐</h1>
+          <ul class="disc-list-wrap">
+            <li class="disc-song"
+                v-for="(item,index) in discList"
+                :key="index" @click="toDiscDetail(item)">
+              <img class="cover"
+                   v-lazy="item.imgurl"
+                   alt="">
+              <div class="content">
+                <h2 class="name">{{item.creator.name}}</h2>
+                <p class="dissname">{{item.dissname}}</p>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
-      <div class="block">
-        <h1 class="title">热门歌单推荐</h1>
-        <ul class="disc-list-wrap">
-          <li class="disc-song"
-              v-for="(item,index) in discList"
-              :key="index">
-            <img class="cover"
-                 v-lazy="item.imgurl"
-                 alt="">
-            <div class="content">
-              <h2 class="name">{{item.creator.name}}</h2>
-              <p class="dissname">{{item.dissname}}</p>
-            </div>
-          </li>
-        </ul>
+      <div class="loading-wrap">
+        <loading v-show="!discList.length"></loading>
       </div>
-    </div>
-    <div class="loading-wrap">
-      <loading v-show="!discList.length"></loading>
-    </div>
-  </scroll>
+    </scroll>
+    <router-view></router-view>
+  </div>
 </template>
 
 <script>
@@ -47,6 +50,7 @@ import Loading from 'base/loading/loading'
 import { getRecommend, getDiscList } from 'api/recommend'
 import { ERR_OK } from 'api/configs'
 import { playlistMixin } from 'common/js/mixin'
+import { mapMutations } from 'vuex'
 
 export default {
   mixins: [playlistMixin],
@@ -55,24 +59,33 @@ export default {
     Scroll,
     Loading
   },
-  data() {
+  data () {
     return {
       recommends: [],
       discList: []
     }
   },
-  created() {
+  created () {
     this._getRecommend()
     this._getDescList()
   },
 
   methods: {
-    handlePlaylist(playlist) {
-      const bottom = playlist.length ? '60px' : '0'
+    handlePlaylist (playlist) {
+      const bottom = playlist.length ? '60px' : ''
       this.$refs.scroll.$el.style.bottom = bottom
-      this.$refs.refresh()
+      this.$refs.scroll.refresh()
     },
-    _getRecommend() {
+    toDiscDetail (item) {
+      this.$router.push({
+        name: 'disc',
+        params: {
+          id: item.dissid
+        }
+      })
+      this.setDisc(item)
+    },
+    _getRecommend () {
       getRecommend()
         .then(res => {
           if (res.code === ERR_OK) {
@@ -80,19 +93,22 @@ export default {
           }
         })
     },
-    _getDescList() {
+    _getDescList () {
       getDiscList().then(res => {
         this.discList = res.data.list
       }).catch(e => {
         console.log(e)
       })
     },
-    imgLoad() {
+    imgLoad () {
       if (!this.checkLoaded) {
         this.$refs.scroll.refresh()
         this.checkLoaded = true
       }
-    }
+    },
+    ...mapMutations({
+      setDisc: 'SET_DISC'
+    })
   }
 }
 </script>

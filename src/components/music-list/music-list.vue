@@ -98,7 +98,7 @@ export default {
       })
     },
     handlePlaylist (playlist) {
-      let bottom = playlist.length ? '60px' : '0'
+      const bottom = playlist.length ? '60px' : ''
       this.$refs.musicList.style.bottom = bottom
       this.$refs.scroll.refresh()
     },

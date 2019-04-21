@@ -1,6 +1,8 @@
 <template>
-  <div class="container" ref="container">
-    <list-view ref="listView" :data="singerList"
+  <div class="container"
+       ref="container">
+    <list-view ref="listView"
+               :data="singerList"
                @select="toDetail"></list-view>
     <router-view></router-view>
   </div>
@@ -73,7 +75,7 @@ export default {
       return hot.concat(ret)
     },
     handlePlaylist (playlist) {
-      let bottom = playlist.length ? '60px' : '0'
+      const bottom = playlist.length ? '60px' : ''
       this.$refs.container.style.bottom = bottom
       this.$refs.listView.refresh()
     },
