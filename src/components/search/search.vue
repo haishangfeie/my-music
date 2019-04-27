@@ -1,17 +1,26 @@
 <template>
   <div class="search-wrap">
     <div class="search-box-wrap">
-      <search-box @query="onquery" ref="searchBox"></search-box>
+      <search-box @query="onquery"
+                  ref="searchBox"></search-box>
     </div>
-    <div class="shortcut-wrap">
+    <div class="shortcut-wrap"
+         v-show="!query">
       <div>
         <div class="hot-key">
           <h2 class="title">热门搜索</h2>
           <ul class="hot-key-list">
-            <li class="hot-item" v-for="(item,index) in hotKeys" :key="index" @click="addQuery(item.k)">{{item.k}}</li>
+            <li class="hot-item"
+                v-for="(item,index) in hotKeys"
+                :key="index"
+                @click="addQuery(item.k)">{{item.k}}</li>
           </ul>
         </div>
       </div>
+    </div>
+    <div class="search-result"
+         v-show="query">
+      <suggest :query="query"></suggest>
     </div>
   </div>
 </template>
@@ -20,10 +29,12 @@
 import SearchBox from 'base/search-box/search-box'
 import { getHotKey } from 'api/search'
 import { ERR_OK } from 'api/configs'
+import Suggest from '@@/suggest/suggest'
 
 export default {
   components: {
-    SearchBox
+    SearchBox,
+    Suggest
   },
   data: function () {
     return {
@@ -76,4 +87,9 @@ export default {
           background: #333
           font-size: $font-size-medium
           color: $color-text-d
+  .search-result
+    position: fixed
+    top: 168px
+    bottom: 0
+    width 100%
 </style>

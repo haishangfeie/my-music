@@ -44,7 +44,7 @@ export function createSong (musicData) {
   })
 }
 
-function mapSinger (singer) {
+export function mapSinger (singer) {
   if (!singer.length) {
     return ''
   }

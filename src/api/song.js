@@ -52,11 +52,7 @@ export function getSongsUrl (songs) {
                   purlMap[item.songmid] = item.purl
                 }
               })
-              if (Object.keys(purlMap).length > 0) {
-                resolve(purlMap)
-              } else {
-                retry()
-              }
+              resolve(purlMap)
             } else {
               retry()
             }
@@ -70,7 +66,8 @@ export function getSongsUrl (songs) {
       if (tryTime > 0) {
         request()
       } else {
-        reject(new Error('Can not get the song url'))
+        // reject(new Error('Can not get the song url'))
+        resolve({})
       }
     }
   })
@@ -87,9 +84,10 @@ export function getLyric (mid) {
     pcachetime: +new Date(),
     format: 'json'
   })
-  return axios.get(url, {
-    params: data
-  })
+  return axios
+    .get(url, {
+      params: data
+    })
     .then(res => {
       return Promise.resolve(res.data)
     })
