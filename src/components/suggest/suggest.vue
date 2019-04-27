@@ -1,5 +1,5 @@
 <template>
-  <scroll class="suggest">
+  <scroll class="suggest" :data="result" :pullup="true" @scrollToEnd="serachMove">
     <ul>
       <li class="item"
           v-for="(item,index) in result"
@@ -8,7 +8,7 @@
            :class="getIconCls(item)"></i>
         <p class="name">{{getName(item)}}</p>
       </li>
-      <div class="loading-wrap">
+      <div class="loading-wrap" v-show="haveMove">
         <loading title=""></loading>
       </div>
     </ul>
@@ -94,6 +94,7 @@ export default {
       }).then(res => {
         this.isSearching = false
         if (res.code === ERR_OK) {
+          this.checkMore(res.data)
           this.getResult(res.data).then(result => {
             this.result = result
             // 确保结果数大于等于perpage是为了确保条数足够进行上拉刷新
@@ -108,8 +109,15 @@ export default {
         }
       })
     },
+    checkMore (data) {
+      if (data.song.list.length < perpage) {
+        this.haveMove = false
+      } else {
+        this.haveMove = true
+      }
+    },
     serachMove () {
-      if (this.isSearching) {
+      if (this.isSearching || !this.haveMove) {
         return
       }
       this.isSearching = true
@@ -122,6 +130,7 @@ export default {
       }).then(res => {
         this.isSearching = false
         if (res.code === ERR_OK) {
+          this.checkMore(res.data)
           this.getResult(res.data).then(result => {
             this.result = this.result.concat(result)
             // 如果列表可以继续加载，但是结果还没有满perpage条的话继续加载，避免由于加载的数量不足，无法触发上拉加载更多
