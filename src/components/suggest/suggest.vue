@@ -1,18 +1,22 @@
 <template>
-  <scroll class="suggest" :data="result" :pullup="true" @scrollToEnd="serachMove">
+  <scroll class="suggest"
+          :data="result"
+          :pullup="true"
+          @scrollToEnd="serachMove">
     <ul>
       <li class="item"
           v-for="(item,index) in result"
-          :key="index">
+          :key="index"
+          @click="selectItem(item)">
         <i class="icon"
            :class="getIconCls(item)"></i>
         <p class="name">{{getName(item)}}</p>
       </li>
-      <div class="loading-wrap" v-show="haveMove">
+      <div class="loading-wrap"
+           v-show="haveMove">
         <loading title=""></loading>
       </div>
     </ul>
-
   </scroll>
 </template>
 
@@ -23,6 +27,8 @@ import Scroll from 'base/scroll/scroll'
 import { createSong, isValiMusic, processSongsUrl } from 'common/js/song'
 import Loading from 'base/loading/loading'
 import axios from 'axios'
+import { mapMutations, mapActions } from 'vuex'
+import Singer from 'common/js/singer'
 
 const perpage = 20
 const TYPE_SINGER = 'singer'
@@ -164,7 +170,28 @@ export default {
         }
       })
       return songs
-    }
+    },
+    selectItem (item) {
+      if (item.type === TYPE_SINGER) {
+        this.setSinger(new Singer({ id: item.singermid, name: item.singername }))
+        this.$router.push({
+          name: 'singerDetailBySearch',
+          params: {
+            id: item.singermid
+          }
+        })
+      } else {
+        this.insertSong({
+          song: item
+        })
+      }
+    },
+    ...mapMutations({
+      setSinger: 'SET_SINGER'
+    }),
+    ...mapActions([
+      'insertSong'
+    ])
   }
 }
 </script>
