@@ -20,7 +20,7 @@
     </div>
     <div class="search-result"
          v-show="query">
-      <suggest :query="query"></suggest>
+      <suggest :query="query" @scrollStart="inputBlur"></suggest>
     </div>
     <router-view></router-view>
   </div>
@@ -52,6 +52,9 @@ export default {
     },
     addQuery (query) {
       this.$refs.searchBox.setQuery(query)
+    },
+    inputBlur () {
+      this.$refs.searchBox.blur()
     },
     _getHotKey () {
       getHotKey().then(res => {

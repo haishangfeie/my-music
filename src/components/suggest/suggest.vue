@@ -2,7 +2,9 @@
   <scroll class="suggest"
           :data="result"
           :pullup="true"
-          @scrollToEnd="serachMove">
+          :beforeScroll="true"
+          @scrollToEnd="serachMove"
+          @beforeScroll="scrollStart">
     <ul>
       <li class="item"
           v-for="(item,index) in result"
@@ -12,11 +14,15 @@
            :class="getIconCls(item)"></i>
         <p class="name">{{getName(item)}}</p>
       </li>
-      <div class="loading-wrap"
-           v-show="haveMove">
-        <loading title=""></loading>
-      </div>
     </ul>
+    <div class="loading-wrap"
+         v-show="haveMove">
+      <loading title=""></loading>
+    </div>
+    <div v-show="!haveMove && !result.length "
+         class="no-result-wrap">
+      <no-result title="抱歉，没有搜索结果"></no-result>
+    </div>
   </scroll>
 </template>
 
@@ -29,12 +35,13 @@ import Loading from 'base/loading/loading'
 import axios from 'axios'
 import { mapMutations, mapActions } from 'vuex'
 import Singer from 'common/js/singer'
+import NoResult from 'base/no-result/no-result'
 
 const perpage = 20
 const TYPE_SINGER = 'singer'
 
 export default {
-  components: { Scroll, Loading },
+  components: { Scroll, Loading, NoResult },
   props: {
     query: {
       type: String,
@@ -186,6 +193,9 @@ export default {
         })
       }
     },
+    scrollStart () {
+      this.$emit('scrollStart')
+    },
     ...mapMutations({
       setSinger: 'SET_SINGER'
     }),
@@ -200,6 +210,7 @@ export default {
 @import '~styl/variable'
 @import '~styl/mixin'
 .suggest
+  position: relative
   height: 100%
   overflow: hidden
   padding: 10px 30px 0
@@ -219,4 +230,10 @@ export default {
   .loading-wrap
     width: 100%
     text-align: center
+  .no-result-wrap
+    position: absolute
+    top: 50%
+    left: 0
+    width: 100%
+    transform: translateY(-60%)
 </style>

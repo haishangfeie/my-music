@@ -4,7 +4,8 @@
     <input type="text"
            class="search-input"
            v-model="query"
-           :placeholder="placeholder">
+           :placeholder="placeholder"
+           ref="input">
     <i @click="clear"
        v-show="query"
        class="icon-dismiss"></i>
@@ -12,6 +13,8 @@
 </template>
 
 <script>
+import { debounce } from 'common/js/util'
+
 export default {
   props: {
     placeholder: {
@@ -25,9 +28,9 @@ export default {
     }
   },
   created () {
-    this.$watch('query', (newVal) => {
+    this.$watch('query', debounce((newVal) => {
       this.$emit('query', this.query)
-    })
+    }, 400))
   },
   methods: {
     clear () {
@@ -35,6 +38,9 @@ export default {
     },
     setQuery (query) {
       this.query = query
+    },
+    blur () {
+      this.$refs.input.blur()
     }
   }
 }
