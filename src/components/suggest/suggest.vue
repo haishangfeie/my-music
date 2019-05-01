@@ -188,10 +188,9 @@ export default {
           }
         })
       } else {
-        this.insertSong({
-          song: item
-        })
+        this.insertSong(item)
       }
+      this.$emit('select', item)
     },
     scrollStart () {
       this.$emit('scrollStart')

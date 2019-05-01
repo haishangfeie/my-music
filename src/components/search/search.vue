@@ -16,11 +16,20 @@
                 @click="addQuery(item.k)">{{item.k}}</li>
           </ul>
         </div>
+        <div class="search-history" v-show="searchHistory.length">
+          <div class="history-header">
+            <h2 class="title">搜索历史</h2>
+            <div class="icon-wrap" @click="clearSearchHistory">
+              <i class="icon-clear"></i>
+            </div>
+            <search-list :list="searchHistory" @select="addQuery" @deleteItem="delSearchHistoryItem"></search-list>
+          </div>
+        </div>
       </div>
     </div>
     <div class="search-result"
          v-show="query">
-      <suggest :query="query" @scrollStart="inputBlur"></suggest>
+      <suggest :query="query" @scrollStart="inputBlur" @select="saveHistory"></suggest>
     </div>
     <router-view></router-view>
   </div>
@@ -31,11 +40,14 @@ import SearchBox from 'base/search-box/search-box'
 import { getHotKey } from 'api/search'
 import { ERR_OK } from 'api/configs'
 import Suggest from '@@/suggest/suggest'
+import { mapGetters, mapActions } from 'vuex'
+import SearchList from '@@/search-list/search-list'
 
 export default {
   components: {
     SearchBox,
-    Suggest
+    Suggest,
+    SearchList
   },
   data: function () {
     return {
@@ -56,19 +68,33 @@ export default {
     inputBlur () {
       this.$refs.searchBox.blur()
     },
+    saveHistory () {
+      this.saveSearchHistory(this.query)
+    },
     _getHotKey () {
       getHotKey().then(res => {
         if (res.code === ERR_OK) {
           this.hotKeys = res.data.hotkey.slice(0, 10)
         }
       })
-    }
+    },
+    ...mapActions([
+      'saveSearchHistory',
+      'delSearchHistoryItem',
+      'clearSearchHistory'
+    ])
+  },
+  computed: {
+    ...mapGetters([
+      'searchHistory'
+    ])
   }
 }
 </script>
 
 <style lang="stylus" scoped>
 @import '~styl/variable'
+@import '~styl/mixin'
 .search-wrap
   .search-box-wrap
     margin: 20px
@@ -96,4 +122,20 @@ export default {
     top: 168px
     bottom: 0
     width 100%
+  .search-history
+    position relative
+    margin: 0 20px;
+    color: $color-text-l;
+    .history-header
+      height: 40px;
+      line-height 40px
+      font-size: $font-size-medium;
+    .icon-wrap
+      position absolute
+      right -10px
+      top 0
+      padding:0 10px
+      .icon-clear
+        font-size: $font-size-medium;
+        line-height 40px
 </style>

@@ -41,7 +41,8 @@ export default {
     },
     _getSingerDetail () {
       if (!this.singer.id) {
-        this.$router.push('/singer')
+        let path = this.$route.path.split('/').slice(0, -1).join('/')
+        this.$router.push(path)
         return
       }
       getSingerDetail(this.singer.id)

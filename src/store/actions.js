@@ -2,6 +2,7 @@ import * as types from './mutation-typte'
 import { shuffle } from 'common/js/util'
 import { playMode } from 'common/js/config'
 import { findSongIndex } from 'common/js/song'
+import { saveSearch, delSearchItem, delAllSearch } from 'common/js/cache'
 
 export const selectPlay = ({ commit, state }, { list, index }) => {
   commit(types.SET_PLAYING_STATE, true)
@@ -27,7 +28,7 @@ export const playRandom = ({ commit }, { list }) => {
   commit(types.SET_CURRENT_INDEX, 0)
 }
 
-export const insertSong = ({ commit, state }, { song }) => {
+export const insertSong = ({ commit, state }, song) => {
   // 插入歌曲，需要改变playlist/sequenceList/currentIndex/playing/fullScreen
   // 插入歌曲，如果歌曲已在列表中，先删除列表中对应的歌曲，往播放列表中插入歌曲，并将索引指向该歌曲
   let playlist = state.playlist.slice()
@@ -73,4 +74,16 @@ export const insertSong = ({ commit, state }, { song }) => {
   commit(types.SET_CURRENT_INDEX, currentIndex)
   commit(types.SET_FULL_SCREEN, true)
   commit(types.SET_PLAYING_STATE, true)
+}
+
+export const saveSearchHistory = ({ commit }, query) => {
+  commit(types.SET_SEARCH_HISTORY, saveSearch(query))
+}
+
+export const delSearchHistoryItem = ({ commit }, query) => {
+  commit(types.SET_SEARCH_HISTORY, delSearchItem(query))
+}
+
+export const clearSearchHistory = ({ commit }) => {
+  commit(types.SET_SEARCH_HISTORY, delAllSearch())
 }

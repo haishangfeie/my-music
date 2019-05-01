@@ -37,3 +37,7 @@ export const disc = state => {
 export const rankItem = state => {
   return state.rankItem
 }
+
+export const searchHistory = state => {
+  return state.searchHistory
+}
