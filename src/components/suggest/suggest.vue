@@ -1,23 +1,26 @@
 <template>
   <scroll class="suggest"
+          ref="suggest"
           :data="result"
           :pullup="true"
           :beforeScroll="true"
           @scrollToEnd="serachMove"
           @beforeScroll="scrollStart">
-    <ul>
-      <li class="item"
-          v-for="(item,index) in result"
-          :key="index"
-          @click="selectItem(item)">
-        <i class="icon"
-           :class="getIconCls(item)"></i>
-        <p class="name">{{getName(item)}}</p>
-      </li>
-    </ul>
-    <div class="loading-wrap"
-         v-show="haveMove">
-      <loading title=""></loading>
+    <div>
+      <ul>
+        <li class="item"
+            v-for="(item,index) in result"
+            :key="index"
+            @click="selectItem(item)">
+          <i class="icon"
+             :class="getIconCls(item)"></i>
+          <p class="name">{{getName(item)}}</p>
+        </li>
+      </ul>
+      <div class="loading-wrap"
+           v-show="haveMove">
+        <loading title=""></loading>
+      </div>
     </div>
     <div v-show="!haveMove && !result.length "
          class="no-result-wrap">
@@ -194,6 +197,9 @@ export default {
     },
     scrollStart () {
       this.$emit('scrollStart')
+    },
+    refresh () {
+      this.$refs.suggest.refresh()
     },
     ...mapMutations({
       setSinger: 'SET_SINGER'

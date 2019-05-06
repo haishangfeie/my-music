@@ -120,7 +120,8 @@
           </progress-circle>
 
         </div>
-        <div class="control">
+        <div class="control"
+             @click.stop="showPlaylist">
           <i class="icon-playlist"></i>
         </div>
       </div>
@@ -131,6 +132,7 @@
            @error="playError"
            @ended="playEnd"
            @timeupdate="updateTime"></audio>
+    <playlist ref="playlistComp"></playlist>
   </div>
 </template>
 
@@ -146,6 +148,7 @@ import { shuffle } from 'common/js/util'
 import { findSongIndex } from 'common/js/song'
 import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
+import Playlist from '@@/playlist/playlist'
 
 const transform = prefixStyle('transform')
 const transition = prefixStyle('transition')
@@ -167,7 +170,8 @@ export default {
   components: {
     ProgressBar,
     ProgressCircle,
-    Scroll
+    Scroll,
+    Playlist
   },
   computed: {
     playIcon () {
@@ -448,6 +452,9 @@ export default {
           this.$refs.lyricScroll.$el.style[transform] = `translate3d(${-window.innerWidth}px,0,0)`
         }
       }
+    },
+    showPlaylist () {
+      this.$refs.playlistComp.show()
     },
     _pad (num, n = 2) {
       let len = num.toString().length

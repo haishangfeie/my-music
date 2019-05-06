@@ -52,6 +52,6 @@ export function delSearchItem (query) {
 }
 
 export function delAllSearch () {
-  storage.set(SEARCH_KEY, [])
+  storage.remove(SEARCH_KEY)
   return []
 }

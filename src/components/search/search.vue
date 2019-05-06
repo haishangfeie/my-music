@@ -4,8 +4,10 @@
       <search-box @query="onquery"
                   ref="searchBox"></search-box>
     </div>
-    <div class="shortcut-wrap"
-         v-show="!query">
+    <scroll ref="shortcutWrap"
+            class="shortcut-wrap"
+            :data="shortcut"
+            v-show="!query">
       <div>
         <div class="hot-key">
           <h2 class="title">热门搜索</h2>
@@ -16,21 +18,33 @@
                 @click="addQuery(item.k)">{{item.k}}</li>
           </ul>
         </div>
-        <div class="search-history" v-show="searchHistory.length">
+        <div class="search-history"
+             v-show="searchHistory.length">
           <div class="history-header">
             <h2 class="title">搜索历史</h2>
-            <div class="icon-wrap" @click="clearSearchHistory">
+            <div class="icon-wrap"
+                 @click="comfirmClear">
               <i class="icon-clear"></i>
             </div>
-            <search-list :list="searchHistory" @select="addQuery" @deleteItem="delSearchHistoryItem"></search-list>
           </div>
+          <search-list :list="searchHistory"
+                       @select="addQuery"
+                       @deleteItem="delSearchHistoryItem"></search-list>
         </div>
       </div>
-    </div>
-    <div class="search-result"
+    </scroll>
+    <div ref="searchResult"
+         class="search-result"
          v-show="query">
-      <suggest :query="query" @scrollStart="inputBlur" @select="saveHistory"></suggest>
+      <suggest ref="suggest"
+               :query="query"
+               @scrollStart="inputBlur"
+               @select="saveHistory"></suggest>
     </div>
+    <comfirm ref="comfirm"
+             text="是否清空所有搜索历史"
+             comfirmBtnText="清空"
+             @comfirm="clearSearchHistory"></comfirm>
     <router-view></router-view>
   </div>
 </template>
@@ -42,12 +56,18 @@ import { ERR_OK } from 'api/configs'
 import Suggest from '@@/suggest/suggest'
 import { mapGetters, mapActions } from 'vuex'
 import SearchList from '@@/search-list/search-list'
+import Comfirm from 'base/comfirm/comfirm'
+import Scroll from 'base/scroll/scroll'
+import { playlistMixin } from 'common/js/mixin'
 
 export default {
+  mixins: [playlistMixin],
   components: {
     SearchBox,
     Suggest,
-    SearchList
+    SearchList,
+    Comfirm,
+    Scroll
   },
   data: function () {
     return {
@@ -59,6 +79,15 @@ export default {
     this._getHotKey()
   },
   methods: {
+    handlePlaylist (playlist) {
+      const bottom = playlist.length ? '60px' : ''
+
+      this.$refs.searchResult.style.bottom = bottom
+      this.$refs.suggest.refresh()
+
+      this.$refs.shortcutWrap.$el.style.bottom = bottom
+      this.$refs.shortcutWrap.refresh()
+    },
     onquery (query) {
       this.query = query
     },
@@ -70,6 +99,9 @@ export default {
     },
     saveHistory () {
       this.saveSearchHistory(this.query)
+    },
+    comfirmClear () {
+      this.$refs.comfirm.show()
     },
     _getHotKey () {
       getHotKey().then(res => {
@@ -84,7 +116,19 @@ export default {
       'clearSearchHistory'
     ])
   },
+  watch: {
+    query (newQuery) {
+      if (!newQuery) {
+        this.$nextTick(() => {
+          this.$refs.shortcutWrap.refresh()
+        })
+      }
+    }
+  },
   computed: {
+    shortcut () {
+      return this.hotKeys.concat(this.searchHistory)
+    },
     ...mapGetters([
       'searchHistory'
     ])
@@ -102,6 +146,7 @@ export default {
     position: fixed
     top: 168px
     bottom: 0
+    overflow: hidden
     .hot-key
       margin: 0 20px 20px 20px
       .title
@@ -121,21 +166,21 @@ export default {
     position: fixed
     top: 168px
     bottom: 0
-    width 100%
+    width: 100%
   .search-history
-    position relative
-    margin: 0 20px;
-    color: $color-text-l;
+    position: relative
+    margin: 0 20px
+    color: $color-text-l
     .history-header
-      height: 40px;
-      line-height 40px
-      font-size: $font-size-medium;
+      height: 40px
+      line-height: 40px
+      font-size: $font-size-medium
     .icon-wrap
-      position absolute
-      right -10px
-      top 0
-      padding:0 10px
+      position: absolute
+      right: -10px
+      top: 0
+      padding: 0 10px
       .icon-clear
-        font-size: $font-size-medium;
-        line-height 40px
+        font-size: $font-size-medium
+        line-height: 40px
 </style>
