@@ -144,16 +144,16 @@ import { mapGetters, mapMutations } from 'vuex'
 import animations from 'create-keyframe-animation'
 import { prefixStyle } from 'common/js/dom'
 import { playMode } from 'common/js/config'
-import { shuffle } from 'common/js/util'
-import { findSongIndex } from 'common/js/song'
 import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
 import Playlist from '@@/playlist/playlist'
+import { PlayerMixin } from 'common/js/mixin'
 
 const transform = prefixStyle('transform')
 const transition = prefixStyle('transition')
 
 export default {
+  mixins: [PlayerMixin],
   data () {
     return {
       songReady: false,
@@ -189,25 +189,13 @@ export default {
     percentage () {
       return this.currentTime / this.currentSong.duration
     },
-    modeIconCls () {
-      let cls = ''
-      if (this.mode === playMode.sequence) {
-        cls = 'icon-sequence'
-      } else if (this.mode === playMode.loop) {
-        cls = 'icon-loop'
-      } else if (this.mode === playMode.random) {
-        cls = 'icon-random'
-      }
-      return cls
-    },
     ...mapGetters([
       'playlist',
       'fullScreen',
       'currentSong',
       'playing',
       'currentIndex',
-      'mode',
-      'sequenceList'
+      'mode'
     ])
   },
   methods: {
@@ -370,10 +358,6 @@ export default {
         this.lyric.seek(currentTime * 1000)
       }
     },
-    changeMode () {
-      let mode = (this.mode + 1) % 3
-      this.setMode(mode)
-    },
     getLyric () {
       this.currentSong.getLyric()
         .then(lyric => {
@@ -466,9 +450,7 @@ export default {
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
       setPlayingState: 'SET_PLAYING_STATE',
-      setCurrentIndex: 'SET_CURRENT_INDEX',
-      setMode: 'SET_MODE',
-      setPlayList: 'SET_PLAYLIST'
+      setCurrentIndex: 'SET_CURRENT_INDEX'
     })
   },
   watch: {
@@ -493,16 +475,6 @@ export default {
       this.$nextTick(() => {
         newPlaying ? audio.play() : audio.pause()
       })
-    },
-    mode (newMode) {
-      if (newMode === playMode.random) {
-        let randomList = shuffle(this.sequenceList)
-        this.setCurrentIndex(findSongIndex(randomList, this.currentSong))
-        this.setPlayList(randomList)
-      } else {
-        this.setCurrentIndex(findSongIndex(this.sequenceList, this.currentSong))
-        this.setPlayList(this.sequenceList)
-      }
     }
   }
 }

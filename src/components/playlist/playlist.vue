@@ -9,7 +9,7 @@
           <div class="mode-wrap"
                @click="changeMode">
             <i class="icon"
-               :class="modeIcon"></i>
+               :class="modeIconCls"></i>
             <span class="text">{{modeText}}</span>
           </div>
           <div class="clear"
@@ -63,7 +63,9 @@ import { playMode } from 'common/js/config'
 import { findSongIndex } from 'common/js/song'
 import Scroll from 'base/scroll/scroll'
 import Confirm from 'base/confirm/confirm'
+import { PlayerMixin } from 'common/js/mixin'
 export default {
+  mixins: [PlayerMixin],
   data () {
     return {
       showFlag: false
@@ -74,15 +76,6 @@ export default {
     Confirm
   },
   computed: {
-    modeIcon () {
-      if (this.mode === playMode.sequence) {
-        return 'icon-sequence'
-      } else if (this.mode === playMode.loop) {
-        return 'icon-loop'
-      } else {
-        return 'icon-random'
-      }
-    },
     modeText () {
       if (this.mode === playMode.sequence) {
         return '顺序播放'
@@ -129,10 +122,6 @@ export default {
       this.setCurrentIndex(index)
       this.setPlayingState(true)
     },
-    changeMode () {
-      let mode = (this.mode + 1) % 3
-      this.setMode(mode)
-    },
     scrollToCurrentSong (song) {
       if (!this.showFlag) {
         return
@@ -159,8 +148,7 @@ export default {
     },
     ...mapMutations({
       setCurrentIndex: 'SET_CURRENT_INDEX',
-      setPlayingState: 'SET_PLAYING_STATE',
-      setMode: 'SET_MODE'
+      setPlayingState: 'SET_PLAYING_STATE'
     }),
     ...mapActions([
       'deleteOneSong',

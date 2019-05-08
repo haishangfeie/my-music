@@ -4,6 +4,9 @@ import { playMode } from 'common/js/config'
 import { findSongIndex } from 'common/js/song'
 import { saveSearch, delSearchItem, delAllSearch } from 'common/js/cache'
 
+/**
+ * 播放歌曲列表，从index开始播放
+ */
 export const selectPlay = ({ commit, state }, { list, index }) => {
   commit(types.SET_PLAYING_STATE, true)
   commit(types.SET_FULL_SCREEN, true)
@@ -18,6 +21,9 @@ export const selectPlay = ({ commit, state }, { list, index }) => {
   commit(types.SET_CURRENT_INDEX, index)
 }
 
+/**
+ * 随机播放全部
+ */
 export const playRandom = ({ commit }, { list }) => {
   commit(types.SET_PLAYING_STATE, true)
   commit(types.SET_FULL_SCREEN, true)
@@ -28,6 +34,9 @@ export const playRandom = ({ commit }, { list }) => {
   commit(types.SET_CURRENT_INDEX, 0)
 }
 
+/**
+ * 插入并播放歌曲
+ */
 export const insertSong = ({ commit, state }, song) => {
   // 插入歌曲，需要改变playlist/sequenceList/currentIndex/playing/fullScreen
   // 插入歌曲，如果歌曲已在列表中，先删除列表中对应的歌曲，往播放列表中插入歌曲，并将索引指向该歌曲
@@ -127,4 +136,25 @@ export function clearSongList ({ commit }) {
   commit(types.SET_PLAYLIST, [])
   commit(types.SET_CURRENT_INDEX, -1)
   commit(types.SET_PLAYING_STATE, false)
+}
+
+/**
+ * 切换播放模式，同时要将歌曲列表按照模式调整
+ */
+export const switchMode = ({ commit, state }, newMode) => {
+  let sequenceList = state.sequenceList.slice()
+  let currentIndex = state.currentIndex
+  let currentSong = state.playlist[currentIndex]
+  // 默认先设置为与sequenceList一致
+  let playlist = sequenceList
+
+  if (newMode === playMode.random) {
+    playlist = shuffle(sequenceList)
+  }
+
+  currentIndex = findSongIndex(playlist, currentSong)
+
+  commit(types.SET_MODE, newMode)
+  commit(types.SET_PLAYLIST, playlist)
+  commit(types.SET_CURRENT_INDEX, currentIndex)
 }
