@@ -473,6 +473,9 @@ export default {
   },
   watch: {
     currentSong (newSong, oldSong) {
+      if (!newSong.id) {
+        return
+      }
       if (newSong.id === oldSong.id) {
         return
       }
@@ -716,6 +719,7 @@ export default {
       flex: 0 0 32px
       width: 32px
       padding: 0 10px
+      extend-click()
       i
         font-size: 32px
         color: $color-theme-d

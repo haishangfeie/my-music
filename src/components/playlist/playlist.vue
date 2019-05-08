@@ -6,19 +6,26 @@
       <div class="playlist"
            @click.stop>
         <div class="header">
-          <i class="icon icon-sequence"></i>
-          <span class="text">顺序播放</span>
-          <div class="clear">
+          <div class="mode-wrap"
+               @click="changeMode">
+            <i class="icon"
+               :class="modeIcon"></i>
+            <span class="text">{{modeText}}</span>
+          </div>
+          <div class="clear"
+               @click="showConfirm">
             <i class="icon-clear"></i>
           </div>
         </div>
         <scroll ref="content"
                 class="content"
                 :data="sequenceList">
-          <ul>
+          <transition-group tag="ul"
+                            name="list">
             <li class="item"
+                ref="songItems"
                 v-for="(item,index) in sequenceList"
-                :key="index"
+                :key="item.id"
                 @click="selectItem(item,index)">
               <i class="icon-play"
                  :class="getCurrentCls(item)"></i>
@@ -26,9 +33,10 @@
               <div class="like">
                 <i class="icon-not-favorite"></i>
               </div>
-              <div class="delete"><i class="icon-delete"></i></div>
+              <div class="delete"
+                   @click.stop="deleteOne(item)"><i class="icon-delete"></i></div>
             </li>
-          </ul>
+          </transition-group>
         </scroll>
         <div class="operate">
           <div class="add">
@@ -41,15 +49,20 @@
           <span>关闭</span>
         </div>
       </div>
+      <confirm ref="confirm"
+               text="是否清空播放列表"
+               confirmBtnText="清空"
+               @confirm="confirmClear"></confirm>
     </div>
   </transition>
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { playMode } from 'common/js/config'
 import { findSongIndex } from 'common/js/song'
 import Scroll from 'base/scroll/scroll'
+import Confirm from 'base/confirm/confirm'
 export default {
   data () {
     return {
@@ -57,9 +70,28 @@ export default {
     }
   },
   components: {
-    Scroll
+    Scroll,
+    Confirm
   },
   computed: {
+    modeIcon () {
+      if (this.mode === playMode.sequence) {
+        return 'icon-sequence'
+      } else if (this.mode === playMode.loop) {
+        return 'icon-loop'
+      } else {
+        return 'icon-random'
+      }
+    },
+    modeText () {
+      if (this.mode === playMode.sequence) {
+        return '顺序播放'
+      } else if (this.mode === playMode.loop) {
+        return '单曲循环'
+      } else {
+        return '随机播放'
+      }
+    },
     ...mapGetters([
       'sequenceList',
       'playlist',
@@ -67,11 +99,17 @@ export default {
       'mode'
     ])
   },
+  watch: {
+    currentSong (newSong) {
+      this.scrollToCurrentSong(newSong)
+    }
+  },
   methods: {
     show () {
       this.showFlag = true
       this.$nextTick(() => {
         this.$refs.content.refresh()
+        this.scrollToCurrentSong(this.currentSong)
       })
     },
     hide () {
@@ -89,10 +127,45 @@ export default {
         index = findSongIndex(this.playlist, item)
       }
       this.setCurrentIndex(index)
+      this.setPlayingState(true)
+    },
+    changeMode () {
+      let mode = (this.mode + 1) % 3
+      this.setMode(mode)
+    },
+    scrollToCurrentSong (song) {
+      if (!this.showFlag) {
+        return
+      }
+      // 滚动到播放歌曲的位置
+      let index = findSongIndex(this.sequenceList, song)
+      if (index !== -1) {
+        let el = this.$refs.songItems[index]
+        this.$refs.content.scrollToElement(el, 300)
+      }
+    },
+    showConfirm () {
+      this.$refs.confirm.show()
+    },
+    deleteOne (item) {
+      this.deleteOneSong(item)
+      if (!this.playlist.length) {
+        this.hide()
+      }
+    },
+    confirmClear () {
+      this.clearSongList()
+      this.hide()
     },
     ...mapMutations({
-      setCurrentIndex: 'SET_CURRENT_INDEX'
-    })
+      setCurrentIndex: 'SET_CURRENT_INDEX',
+      setPlayingState: 'SET_PLAYING_STATE',
+      setMode: 'SET_MODE'
+    }),
+    ...mapActions([
+      'deleteOneSong',
+      'clearSongList'
+    ])
   }
 }
 </script>
@@ -124,14 +197,17 @@ export default {
       display: flex
       padding: 20px 30px 10px 20px
       align-items: center
-      .icon
-        margin-right: 10px
-        font-size: 30px
-        color: $color-theme-d
-      .text
+      .mode-wrap
+        display: flex
         flex: 1
-        font-size: $font-size-medium
-        color: $color-text-l
+        align-items: center
+        .icon
+          margin-right: 10px
+          font-size: 30px
+          color: $color-theme-d
+        .text
+          font-size: $font-size-medium
+          color: $color-text-l
       .clear
         extend-click()
         .icon-clear
@@ -145,6 +221,11 @@ export default {
         display: flex
         align-items: center
         height: 40px
+        &.list-enter-active, &.list-leave-active
+          transition: height 0.3s, opacity 0.3s
+        &.list-enter, &.list-leave-to
+          height: 0
+          opacity: 0
         .icon-play
           visibility: hidden
           flex: 0 0 20px

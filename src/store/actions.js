@@ -87,3 +87,44 @@ export const delSearchHistoryItem = ({ commit }, query) => {
 export const clearSearchHistory = ({ commit }) => {
   commit(types.SET_SEARCH_HISTORY, delAllSearch())
 }
+
+export const deleteOneSong = ({ commit, state }, song) => {
+  let sequenceList = state.sequenceList.slice()
+  let playlist = state.playlist.slice()
+  let currentIndex = state.currentIndex
+
+  let sIndex = findSongIndex(sequenceList, song)
+  sequenceList.splice(sIndex, 1)
+
+  let pIndex = findSongIndex(playlist, song)
+  playlist.splice(pIndex, 1)
+
+  // 判断currentIndex是否需要调整
+  if (currentIndex > pIndex) {
+    currentIndex--
+  }
+  // 如果currentIndex是最后一首歌，恰好删的就是最后一首歌，切换为第一首歌
+  if (playlist.length === currentIndex) {
+    currentIndex = 0
+  }
+  // 如果歌曲列表已经空了，currentIndex为-1
+  if (playlist.length === 0) {
+    currentIndex = -1
+  }
+  let playingState = playlist.length > 0
+
+  commit(types.SET_SEQUENCE_LIST, sequenceList)
+  commit(types.SET_PLAYLIST, playlist)
+  commit(types.SET_CURRENT_INDEX, currentIndex)
+  commit(types.SET_PLAYING_STATE, playingState)
+}
+
+/**
+ * 清空播放列表
+ */
+export function clearSongList ({ commit }) {
+  commit(types.SET_SEQUENCE_LIST, [])
+  commit(types.SET_PLAYLIST, [])
+  commit(types.SET_CURRENT_INDEX, -1)
+  commit(types.SET_PLAYING_STATE, false)
+}

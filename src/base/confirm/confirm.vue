@@ -1,15 +1,15 @@
 <template>
-  <transition name="comfirm-fade">
-    <div class="comfirm"
-         v-show="showFlag">
+  <transition name="confirm-fade">
+    <div class="confirm"
+         v-show="showFlag" @click.stop>
       <div class="content-wrap">
         <div class="content">
           <p class="text">{{text}}</p>
           <div class="btn-wrap">
             <div class="cancel-btn btn left"
                  @click="cancel">{{cancelBtnText}}</div>
-            <div class="comfirm-btn btn"
-                 @click="comfirm">{{comfirmBtnText}}</div>
+            <div class="confirm-btn btn"
+                 @click="confirm">{{confirmBtnText}}</div>
           </div>
         </div>
       </div>
@@ -28,7 +28,7 @@ export default {
       type: String,
       default: '取消'
     },
-    comfirmBtnText: {
+    confirmBtnText: {
       type: String,
       default: '确认'
     }
@@ -49,9 +49,9 @@ export default {
       this.hide()
       this.$emit('cancel')
     },
-    comfirm () {
+    confirm () {
       this.hide()
-      this.$emit('comfirm')
+      this.$emit('confirm')
     }
   }
 }
@@ -59,7 +59,7 @@ export default {
 
 <style lang="stylus" scoped>
 @import '~styl/variable'
-.comfirm
+.confirm
   position: fixed
   top: 0
   right: 0
@@ -67,9 +67,9 @@ export default {
   left: 0
   z-index: 998
   background-color: $color-background-d
-  &.comfirm-fade-enter
+  &.confirm-fade-enter
     opacity: 0
-  &.comfirm-fade-enter-active
+  &.confirm-fade-enter-active
     transition: opacity 0.3s
     .content
       animation: confirm-zoom 0.3s
