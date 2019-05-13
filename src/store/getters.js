@@ -41,3 +41,7 @@ export const rankItem = state => {
 export const searchHistory = state => {
   return state.searchHistory
 }
+
+export const playHistory = state => {
+  return state.playHistory
+}

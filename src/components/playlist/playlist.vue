@@ -20,10 +20,9 @@
         <scroll ref="content"
                 class="content"
                 :data="sequenceList">
-          <transition-group tag="ul"
+          <transition-group ref="list" tag="ul"
                             name="list">
             <li class="item"
-                ref="songItems"
                 v-for="(item,index) in sequenceList"
                 :key="item.id"
                 @click="selectItem(item,index)">
@@ -39,7 +38,8 @@
           </transition-group>
         </scroll>
         <div class="operate">
-          <div class="add">
+          <div class="add"
+               @click="showAddSong">
             <i class="icon-add"></i>
             <span class="text">添加歌曲到队列</span>
           </div>
@@ -53,6 +53,7 @@
                text="是否清空播放列表"
                confirmBtnText="清空"
                @confirm="confirmClear"></confirm>
+      <add-song ref="addSong"></add-song>
     </div>
   </transition>
 </template>
@@ -64,6 +65,8 @@ import { findSongIndex } from 'common/js/song'
 import Scroll from 'base/scroll/scroll'
 import Confirm from 'base/confirm/confirm'
 import { PlayerMixin } from 'common/js/mixin'
+import AddSong from '@@/add-song/add-song'
+
 export default {
   mixins: [PlayerMixin],
   data () {
@@ -73,7 +76,8 @@ export default {
   },
   components: {
     Scroll,
-    Confirm
+    Confirm,
+    AddSong
   },
   computed: {
     modeText () {
@@ -94,19 +98,24 @@ export default {
   },
   watch: {
     currentSong (newSong) {
-      this.scrollToCurrentSong(newSong)
+      setTimeout(() => {
+        this.scrollToCurrentSong(newSong)
+      }, 20)
     }
   },
   methods: {
     show () {
       this.showFlag = true
+      this.refresh()
+    },
+    hide () {
+      this.showFlag = false
+    },
+    refresh () {
       this.$nextTick(() => {
         this.$refs.content.refresh()
         this.scrollToCurrentSong(this.currentSong)
       })
-    },
-    hide () {
-      this.showFlag = false
     },
     getCurrentCls (item) {
       if (item.id === this.currentSong.id) {
@@ -126,10 +135,13 @@ export default {
       if (!this.showFlag) {
         return
       }
+
       // 滚动到播放歌曲的位置
       let index = findSongIndex(this.sequenceList, song)
+
       if (index !== -1) {
-        let el = this.$refs.songItems[index]
+        let el = this.$refs.list.$el.children[index]
+
         this.$refs.content.scrollToElement(el, 300)
       }
     },
@@ -145,6 +157,9 @@ export default {
     confirmClear () {
       this.clearSongList()
       this.hide()
+    },
+    showAddSong () {
+      this.$refs.addSong.show()
     },
     ...mapMutations({
       setCurrentIndex: 'SET_CURRENT_INDEX',

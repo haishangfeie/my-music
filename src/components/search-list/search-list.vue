@@ -1,12 +1,18 @@
 <template>
-  <ul class="search-list">
-    <li class="search-list-item" v-for="(item,index) in list" :key="index" @click="selectItem(item)">
+  <transition-group name="list"
+                    tag="ul"
+                    class="search-list">
+    <li class="search-list-item"
+        v-for="(item) in list"
+        :key="item"
+        @click="selectItem(item)">
       <span class="name">{{item}}</span>
-      <div class="icon-wrap" @click.stop="deleteItem(item)">
+      <div class="icon-wrap"
+           @click.stop="deleteItem(item)">
         <i class="icon-delete"></i>
       </div>
     </li>
-  </ul>
+  </transition-group>
 </template>
 
 <script>
@@ -38,9 +44,13 @@ export default {
     display: flex
     align-items: center
     height: 40px
+    transition: opacity 0.3s, height 0.3s
+    &.list-enter, &.list-leave-to
+      opacity: 0
+      height: 0
     .name
       flex: 1
-      font-size:$font-size-medium-x
+      font-size: $font-size-medium-x
       color: $color-text-l
     .icon-wrap
       extend-click()

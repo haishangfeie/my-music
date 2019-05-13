@@ -2,7 +2,12 @@ import * as types from './mutation-typte'
 import { shuffle } from 'common/js/util'
 import { playMode } from 'common/js/config'
 import { findSongIndex } from 'common/js/song'
-import { saveSearch, delSearchItem, delAllSearch } from 'common/js/cache'
+import {
+  saveSearch,
+  delSearchItem,
+  delAllSearch,
+  savePlay
+} from 'common/js/cache'
 
 /**
  * 播放歌曲列表，从index开始播放
@@ -85,14 +90,23 @@ export const insertSong = ({ commit, state }, song) => {
   commit(types.SET_PLAYING_STATE, true)
 }
 
+/**
+ * 保存搜索历史
+ */
 export const saveSearchHistory = ({ commit }, query) => {
   commit(types.SET_SEARCH_HISTORY, saveSearch(query))
 }
 
+/**
+ * 删除搜索历史item
+ */
 export const delSearchHistoryItem = ({ commit }, query) => {
   commit(types.SET_SEARCH_HISTORY, delSearchItem(query))
 }
 
+/**
+ * 清空搜索历史
+ */
 export const clearSearchHistory = ({ commit }) => {
   commit(types.SET_SEARCH_HISTORY, delAllSearch())
 }
@@ -157,4 +171,11 @@ export const switchMode = ({ commit, state }, newMode) => {
   commit(types.SET_MODE, newMode)
   commit(types.SET_PLAYLIST, playlist)
   commit(types.SET_CURRENT_INDEX, currentIndex)
+}
+
+/**
+ * 保存最近播放
+ */
+export function savePlayHistory ({ commit }, song) {
+  commit(types.SET_PLAY_HISTORY, savePlay(song))
 }

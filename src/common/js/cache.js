@@ -1,6 +1,11 @@
 import storage from 'good-storage'
+import Song from './song'
+
 const SEARCH_KEY = '__search__'
-const MAX_LEN = 15
+const PLAY_KEY = '__play__'
+const MAX_SEARCH_LEN = 15
+const MAX_PLAY_LEN = 200
+
 function insertArr (arr, item, compare, maxLen) {
   let index = arr.findIndex(compare)
   if (index !== -1 && index !== 0) {
@@ -23,19 +28,30 @@ function removeArr (arr, compare) {
     arr.splice(index, 1)
   }
 }
+function _saveList (key, val, compare, len) {
+  let history = storage.get(key, [])
+  insertArr(history, val, compare, len)
+  storage.set(key, history)
+  return history
+}
+function _deleteList (key, compare) {
+  let history = storage.get(key, [])
+  removeArr(history, compare)
+  storage.set(key, history)
+  return history
+}
+
+/** **********搜索历史************/
 
 export function saveSearch (query) {
-  let history = storage.get(SEARCH_KEY, [])
-  insertArr(
-    history,
+  return _saveList(
+    SEARCH_KEY,
     query,
     item => {
       return item === query
     },
-    MAX_LEN
+    MAX_SEARCH_LEN
   )
-  storage.set(SEARCH_KEY, history)
-  return history
 }
 
 export function getSearch () {
@@ -43,15 +59,32 @@ export function getSearch () {
 }
 
 export function delSearchItem (query) {
-  let history = storage.get(SEARCH_KEY, [])
-  removeArr(history, item => {
+  return _deleteList(SEARCH_KEY, item => {
     return item === query
   })
-  storage.set(SEARCH_KEY, history)
-  return history
 }
 
 export function delAllSearch () {
   storage.remove(SEARCH_KEY)
   return []
+}
+
+/** **********最近播放********** */
+export const savePlay = song => {
+  return _saveList(
+    PLAY_KEY,
+    song,
+    item => {
+      return item.id === song.id
+    },
+    MAX_PLAY_LEN
+  ).map(item => {
+    return new Song(item)
+  })
+}
+
+export function getPlay () {
+  return storage.get(PLAY_KEY, []).map(item => {
+    return new Song(item)
+  })
 }

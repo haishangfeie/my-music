@@ -36,16 +36,34 @@ export const PlayerMixin = {
   },
   computed: {
     modeIconCls () {
-      let cls = ''
-      if (this.mode === playMode.sequence) {
-        cls = 'icon-sequence'
-      } else if (this.mode === playMode.loop) {
-        cls = 'icon-loop'
-      } else if (this.mode === playMode.random) {
-        cls = 'icon-random'
+      const modeIconClsList = {
+        [playMode.sequence]: 'icon-sequence',
+        [playMode.loop]: 'icon-loop',
+        [playMode.random]: 'icon-random'
       }
-      return cls
+      return modeIconClsList[this.mode] || ''
     },
     ...mapGetters(['mode'])
+  }
+}
+
+export const searchMixin = {
+  computed: {
+    ...mapGetters(['searchHistory'])
+  },
+  methods: {
+    onqueryCommon (key, query) {
+      this[key] = query
+    },
+    addQueryCommon (component, query) {
+      component.setQuery(query)
+    },
+    inputBlurCommon (component) {
+      component.blur()
+    },
+    saveHistory () {
+      this.saveSearchHistory(this.query)
+    },
+    ...mapActions(['saveSearchHistory', 'delSearchHistoryItem'])
   }
 }

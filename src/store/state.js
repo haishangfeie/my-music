@@ -1,5 +1,5 @@
 import { playMode } from 'common/js/config'
-import { getSearch } from 'common/js/cache'
+import { getSearch, getPlay } from 'common/js/cache'
 
 const state = {
   singer: {},
@@ -11,6 +11,7 @@ const state = {
   currentIndex: -1,
   disc: {},
   rankItem: {},
-  searchHistory: getSearch()
+  searchHistory: getSearch(),
+  playHistory: getPlay()
 }
 export default state

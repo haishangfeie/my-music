@@ -140,7 +140,7 @@
 import ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
 
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import animations from 'create-keyframe-animation'
 import { prefixStyle } from 'common/js/dom'
 import { playMode } from 'common/js/config'
@@ -334,6 +334,7 @@ export default {
     playReady () {
       // 歌曲准备好了才将ready设为true
       this.songReady = true
+      this.savePlayHistory(this.currentSong)
     },
     playError () {
       // 当出现错误时，歌曲就不会ready了，这时为了产品的正常使用，要将ready设会true，这样用户才能继续进行操作
@@ -451,7 +452,10 @@ export default {
       setFullScreen: 'SET_FULL_SCREEN',
       setPlayingState: 'SET_PLAYING_STATE',
       setCurrentIndex: 'SET_CURRENT_INDEX'
-    })
+    }),
+    ...mapActions([
+      'savePlayHistory'
+    ])
   },
   watch: {
     currentSong (newSong, oldSong) {

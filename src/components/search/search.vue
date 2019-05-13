@@ -54,14 +54,14 @@ import SearchBox from 'base/search-box/search-box'
 import { getHotKey } from 'api/search'
 import { ERR_OK } from 'api/configs'
 import Suggest from '@@/suggest/suggest'
-import { mapGetters, mapActions } from 'vuex'
+import { mapActions } from 'vuex'
 import SearchList from '@@/search-list/search-list'
 import Confirm from 'base/confirm/confirm'
 import Scroll from 'base/scroll/scroll'
-import { playlistMixin } from 'common/js/mixin'
+import { playlistMixin, searchMixin } from 'common/js/mixin'
 
 export default {
-  mixins: [playlistMixin],
+  mixins: [playlistMixin, searchMixin],
   components: {
     SearchBox,
     Suggest,
@@ -71,8 +71,8 @@ export default {
   },
   data: function () {
     return {
-      query: '',
-      hotKeys: []
+      hotKeys: [],
+      query: ''
     }
   },
   created () {
@@ -88,20 +88,17 @@ export default {
       this.$refs.shortcutWrap.$el.style.bottom = bottom
       this.$refs.shortcutWrap.refresh()
     },
-    onquery (query) {
-      this.query = query
-    },
-    addQuery (query) {
-      this.$refs.searchBox.setQuery(query)
-    },
-    inputBlur () {
-      this.$refs.searchBox.blur()
-    },
-    saveHistory () {
-      this.saveSearchHistory(this.query)
-    },
     confirmClear () {
       this.$refs.confirm.show()
+    },
+    onquery (query) {
+      this.onqueryCommon('query', query)
+    },
+    addQuery (query) {
+      this.addQueryCommon(this.$refs.searchBox, query)
+    },
+    inputBlur () {
+      this.inputBlurCommon(this.$refs.searchBox)
     },
     _getHotKey () {
       getHotKey().then(res => {
@@ -111,8 +108,6 @@ export default {
       })
     },
     ...mapActions([
-      'saveSearchHistory',
-      'delSearchHistoryItem',
       'clearSearchHistory'
     ])
   },
@@ -128,10 +123,7 @@ export default {
   computed: {
     shortcut () {
       return this.hotKeys.concat(this.searchHistory)
-    },
-    ...mapGetters([
-      'searchHistory'
-    ])
+    }
   }
 }
 </script>
