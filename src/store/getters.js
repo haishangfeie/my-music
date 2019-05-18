@@ -45,3 +45,7 @@ export const searchHistory = state => {
 export const playHistory = state => {
   return state.playHistory
 }
+
+export const favorite = state => {
+  return state.favorite
+}

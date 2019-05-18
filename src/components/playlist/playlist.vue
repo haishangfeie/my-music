@@ -20,7 +20,8 @@
         <scroll ref="content"
                 class="content"
                 :data="sequenceList">
-          <transition-group ref="list" tag="ul"
+          <transition-group ref="list"
+                            tag="ul"
                             name="list">
             <li class="item"
                 v-for="(item,index) in sequenceList"
@@ -29,8 +30,9 @@
               <i class="icon-play"
                  :class="getCurrentCls(item)"></i>
               <span class="song-name">{{item.name}}</span>
-              <div class="like">
-                <i class="icon-not-favorite"></i>
+              <div class="like"
+                   @click.stop="toggleFavorite(item)">
+                <i :class="favoriteCls(item)"></i>
               </div>
               <div class="delete"
                    @click.stop="deleteOne(item)"><i class="icon-delete"></i></div>
@@ -64,11 +66,11 @@ import { playMode } from 'common/js/config'
 import { findSongIndex } from 'common/js/song'
 import Scroll from 'base/scroll/scroll'
 import Confirm from 'base/confirm/confirm'
-import { PlayerMixin } from 'common/js/mixin'
+import { PlayerMixin, favoriteMixin } from 'common/js/mixin'
 import AddSong from '@@/add-song/add-song'
 
 export default {
-  mixins: [PlayerMixin],
+  mixins: [PlayerMixin, favoriteMixin],
   data () {
     return {
       showFlag: false
@@ -243,13 +245,15 @@ export default {
           font-size: $font-size-medium
           color: $color-text-d
         .like
-          extend-click()
-          margin-right: 15px
-          .icon-not-favorite
+          extend-click(-5px)
+          margin-right: 20px
+          i
             font-size: $font-size-small
             color: $color-theme
+            &.icon-favorite
+              color: #d93f30
         .delete
-          extend-click()
+          extend-click(-5px)
           .icon-delete
             font-size: $font-size-small
             color: $color-theme

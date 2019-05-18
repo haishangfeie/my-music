@@ -6,7 +6,9 @@ import {
   saveSearch,
   delSearchItem,
   delAllSearch,
-  savePlay
+  savePlay,
+  saveFavorite,
+  delFavoriteItem
 } from 'common/js/cache'
 
 /**
@@ -178,4 +180,18 @@ export const switchMode = ({ commit, state }, newMode) => {
  */
 export function savePlayHistory ({ commit }, song) {
   commit(types.SET_PLAY_HISTORY, savePlay(song))
+}
+
+/**
+ * 添加收藏
+ */
+export function saveFavoriteList ({ commit }, song) {
+  commit(types.SET_FAVORITE, saveFavorite(song))
+}
+
+/**
+ * 取消收藏
+ */
+export function deleteFavoriteItem ({ commit }, song) {
+  commit(types.SET_FAVORITE, delFavoriteItem(song))
 }

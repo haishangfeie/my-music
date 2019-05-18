@@ -3,8 +3,11 @@ import Song from './song'
 
 const SEARCH_KEY = '__search__'
 const PLAY_KEY = '__play__'
+const FAVORITE_KEY = '__favorite__'
+
 const MAX_SEARCH_LEN = 15
 const MAX_PLAY_LEN = 200
+const MAX_FAVORITE_LEN = 200
 
 function insertArr (arr, item, compare, maxLen) {
   let index = arr.findIndex(compare)
@@ -85,6 +88,31 @@ export const savePlay = song => {
 
 export function getPlay () {
   return storage.get(PLAY_KEY, []).map(item => {
+    return new Song(item)
+  })
+}
+
+export function saveFavorite (song) {
+  return _saveList(
+    FAVORITE_KEY,
+    song,
+    item => {
+      return item.id === song.id
+    },
+    MAX_FAVORITE_LEN
+  ).map(item => {
+    return new Song(item)
+  })
+}
+
+export function delFavoriteItem (song) {
+  return _deleteList(FAVORITE_KEY, item => {
+    return item.id === song.id
+  })
+}
+
+export function getFavorite () {
+  return storage.get(FAVORITE_KEY, []).map(item => {
     return new Song(item)
   })
 }

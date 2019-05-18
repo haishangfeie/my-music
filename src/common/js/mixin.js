@@ -1,5 +1,6 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { playMode } from 'common/js/config'
+import { findSongIndex } from 'common/js/song'
 
 export const playlistMixin = {
   activated () {
@@ -65,5 +66,30 @@ export const searchMixin = {
       this.saveSearchHistory(this.query)
     },
     ...mapActions(['saveSearchHistory', 'delSearchHistoryItem'])
+  }
+}
+
+export const favoriteMixin = {
+  methods: {
+    favoriteCls (song) {
+      let index = findSongIndex(this.favorite, song)
+      if (index !== -1) {
+        return 'icon-favorite'
+      } else {
+        return 'icon-not-favorite'
+      }
+    },
+    toggleFavorite (song) {
+      let index = findSongIndex(this.favorite, song)
+      if (index !== -1) {
+        this.deleteFavoriteItem(song)
+      } else {
+        this.saveFavoriteList(song)
+      }
+    },
+    ...mapActions(['saveFavoriteList', 'deleteFavoriteItem'])
+  },
+  computed: {
+    ...mapGetters(['favorite'])
   }
 }

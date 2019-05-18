@@ -88,8 +88,9 @@
               <i @click="playNext"
                  class="icon-next"></i>
             </div>
-            <div class="icon-wrap i-right">
-              <i class="icon-not-favorite"></i>
+            <div class="icon-wrap i-right"
+                 @click="toggleFavorite(currentSong)">
+              <i :class="favoriteCls(currentSong)"></i>
             </div>
           </div>
         </div>
@@ -147,13 +148,13 @@ import { playMode } from 'common/js/config'
 import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
 import Playlist from '@@/playlist/playlist'
-import { PlayerMixin } from 'common/js/mixin'
+import { PlayerMixin, favoriteMixin } from 'common/js/mixin'
 
 const transform = prefixStyle('transform')
 const transition = prefixStyle('transition')
 
 export default {
-  mixins: [PlayerMixin],
+  mixins: [PlayerMixin, favoriteMixin],
   data () {
     return {
       songReady: false,
@@ -652,6 +653,8 @@ export default {
             color: $color-theme-d
           i
             font-size: 30px
+            &.icon-favorite
+              color: #d93f30
   .mini-player
     position: fixed
     left: 0
