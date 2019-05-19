@@ -32,6 +32,9 @@
 
         </div>
       </scroll>
+      <div class="no-result-wrap" v-show="noResShow">
+        <no-result :title="noResTitle"></no-result>
+      </div>
     </div>
   </transition>
 </template>
@@ -42,13 +45,15 @@ import Scroll from 'base/scroll/scroll'
 import SongList from 'base/song-list/song-list'
 import { mapGetters, mapActions } from 'vuex'
 import { playlistMixin } from 'common/js/mixin'
+import NoResult from 'base/no-result/no-result'
 
 export default {
   mixins: [playlistMixin],
   components: {
     Switches,
     Scroll,
-    SongList
+    SongList,
+    NoResult
   },
   data () {
     return {
@@ -71,6 +76,22 @@ export default {
         return this.playHistory
       }
     },
+    noResShow () {
+      if (this.currentIndex === 0 && !this.favorite.length) {
+        return true
+      }
+      if (this.currentIndex === 1 && !this.playHistory.length) {
+        return true
+      }
+      return false
+    },
+    noResTitle () {
+      if (this.currentIndex === 0) {
+        return '暂无收藏歌曲'
+      } else {
+        return '你还没有听过歌曲'
+      }
+    },
     ...mapGetters([
       'favorite',
       'playHistory'
@@ -79,8 +100,12 @@ export default {
   methods: {
     handlePlaylist (playlist) {
       const bottom = playlist.length ? '60px' : ''
-      this.$refs.favAndHisWrap.$el.style.bottom = bottom
-      this.$refs.favAndHisWrap.refresh()
+      let component = this.$refs.favAndHisWrap
+      if (!component) {
+        return
+      }
+      component.$el.style.bottom = bottom
+      component.refresh()
     },
     back () {
       this.$router.back()
@@ -97,6 +122,9 @@ export default {
         list = this.favorite
       } else {
         list = this.playHistory
+      }
+      if (!list.length) {
+        return
       }
       this.playRandom({ list })
     },
@@ -164,4 +192,9 @@ export default {
     bottom: 0
     width: 100%
     overflow: hidden
+  .no-result-wrap
+    position absolute
+    top 50%
+    left 50%
+    transform:translate(-50%,-50%)
 </style>

@@ -4,7 +4,8 @@
         class="song"
         v-for="(song,index) in songs"
         :key="index">
-      <div v-if="isRank" class="rank">
+      <div v-if="isRank"
+           class="rank">
         <span :class="rankCls(index)">{{rankText(index)}}</span>
       </div>
       <div class="content">
@@ -20,7 +21,7 @@ export default {
   props: {
     songs: {
       type: Array,
-      default () {
+      default() {
         return []
       }
     },
@@ -30,24 +31,24 @@ export default {
     }
   },
   methods: {
-    getDesc (song) {
+    getDesc(song) {
       if (!song) {
         return ''
       }
       let { singer = '', album = '' } = song
       return `${singer}·${album}`
     },
-    selectItem (item, index) {
+    selectItem(item, index) {
       this.$emit('select', item, index)
     },
-    rankCls (index) {
+    rankCls(index) {
       if (index < 3) {
         return `icon icon${index}`
       } else {
         return 'text'
       }
     },
-    rankText (index) {
+    rankText(index) {
       if (index < 3) {
         return ''
       } else {
@@ -93,6 +94,7 @@ export default {
       justify-content: center
       height: 64px
       font-size: $font-size-medium
+      overflow: hidden
       .name
         text-overflow: ellipsis
         white-space: nowrap

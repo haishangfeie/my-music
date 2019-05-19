@@ -4,10 +4,14 @@ import { findSongIndex } from 'common/js/song'
 
 export const playlistMixin = {
   activated () {
-    this.handlePlaylist(this.playlist)
+    this.$nextTick(() => {
+      this.handlePlaylist(this.playlist)
+    })
   },
   mounted () {
-    this.handlePlaylist(this.playlist)
+    this.$nextTick(() => {
+      this.handlePlaylist(this.playlist)
+    })
   },
   computed: {
     ...mapGetters(['playlist'])
