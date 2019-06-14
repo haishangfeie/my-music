@@ -105,8 +105,10 @@ export default {
     },
     handlePlaylist (playlist) {
       const bottom = playlist.length ? '60px' : ''
-      this.$refs.musicList.style.bottom = bottom
-      this.$refs.scroll.refresh()
+      if (this.$refs.musicList) {
+        this.$refs.musicList.style.bottom = bottom
+      }
+      this.$refs.scroll && this.$refs.scroll.refresh()
     },
     _playRandom () {
       this.playRandom({ list: this.songs })

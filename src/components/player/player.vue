@@ -129,7 +129,7 @@
     </transition>
     <audio ref="audio"
            :src="currentSong.url"
-           @canplay="playReady"
+           @playing="playReady"
            @error="playError"
            @ended="playEnd"
            @timeupdate="updateTime"></audio>
@@ -293,7 +293,9 @@ export default {
         this.togglePlay()
       }
       // 歌曲发生切换，将ready设为false表示歌曲还没有ready
-      this.songReady = false
+      if (this.playlist.length !== 1 && this.mode !== playMode.loop) {
+        this.songReady = false
+      }
     },
     playNext () {
       // 歌曲ready以前不允许切换歌曲，避免报错
@@ -316,7 +318,9 @@ export default {
         this.togglePlay()
       }
       // 歌曲发生切换，将ready设为false表示歌曲还没有ready
-      this.songReady = false
+      if (this.playlist.length !== 1 && this.mode !== playMode.loop) {
+        this.songReady = false
+      }
     },
     playEnd () {
       if (this.mode === playMode.loop) {
@@ -363,6 +367,9 @@ export default {
     getLyric () {
       this.currentSong.getLyric()
         .then(lyric => {
+          if (this.currentSong.lyric !== lyric) {
+            return
+          }
           this.lyric = new Lyric(lyric, this.handler)
           if (this.lyric.play) {
             this.lyric.play()
@@ -469,8 +476,10 @@ export default {
       if (this.lyric.stop) {
         this.lyric.stop()
       }
-
-      setTimeout(() => {
+      if (this.timer) {
+        clearTimeout(this.timer)
+      }
+      this.timer = setTimeout(() => {
         this.$refs.audio.play()
         this.getLyric()
       }, 1000)
