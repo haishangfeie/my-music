@@ -5,9 +5,10 @@ import { commonParams, ERR_OK } from 'api/configs'
 const debug = process.env.NODE_ENV !== 'production'
 
 export function getSongsUrl (songs) {
-  let url = debug
-    ? '/api/getPurlUrl'
-    : 'http://ustbhuangyi.com/music/api/getPurlUrl'
+  // let url = debug
+  //   ? '/api/getPurlUrl'
+  //   : 'http://ustbhuangyi.com/music/api/getPurlUrl'
+  let url = '/api/getPurlUrl'
 
   // 在发出请求前，先要将参数构造出来
   let mids = []
