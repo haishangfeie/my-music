@@ -3,6 +3,8 @@ var axios = require('axios')
 var bodyParser = require('body-parser')
 module.exports = {
   devServer: {
+    host: '0.0.0.0',
+    port: 8080,
     before: function (app) {
       app.get('/api/getDiscList', function (req, res) {
         const url =

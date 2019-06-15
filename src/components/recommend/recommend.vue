@@ -118,7 +118,7 @@ export default {
 .recommend
   position: fixed
   width: 100%
-  top: 88px
+  top: 86px
   bottom: 0
   overflow: hidden
   .slider-wrap
