@@ -8,6 +8,10 @@ import vueLazyLoad from 'vue-lazyload'
 
 import 'common/stylus/index.styl'
 
+/* eslint-disable no-undef,no-unused-vars */
+import VConsole from 'vconsole'
+var vConsole = new VConsole()
+
 fastclick.attach(document.body)
 
 Vue.use(vueLazyLoad, {
