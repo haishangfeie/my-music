@@ -537,6 +537,7 @@ export default {
         line-height: 20px
         font-size: $font-size-medium
         color: $color-text
+        no-wrap()
       .back
         position: absolute
         left: 6px
